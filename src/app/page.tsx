@@ -98,9 +98,9 @@ export default function Home() {
   const finalTotalDisplay = cartTotal + (orderType === 'delivery' ? config.deliveryFee : 0);
 
   return (
-    <div className="min-h-screen bg-gray-50 text-zinc-900 font-sans selection:bg-orange-600 selection:text-white pb-10">
+    <div className="min-h-screen text-white font-sans selection:bg-orange-600 selection:text-white pb-10">
       {/* Navbar */}
-      <nav className="fixed w-full z-40 bg-white/90 backdrop-blur-md border-b border-gray-200 shadow-sm">
+      <nav className="fixed w-full z-40 bg-zinc-950/90 backdrop-blur-md border-b border-zinc-800 shadow-sm">
         <div className="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-3 text-2xl font-black tracking-tighter text-orange-600 drop-shadow-sm">
             {config.logoUrl ? (
@@ -112,7 +112,7 @@ export default function Home() {
             )}
             {isMounted && (
               <div className="flex items-center gap-3">
-                <span className="text-zinc-900 text-lg sm:text-2xl">{config.storeName}</span>
+                <span className="text-white text-lg sm:text-2xl">{config.storeName}</span>
                 <span className={`text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full ${config.actualIsOpen ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-red-100 text-red-700 border border-red-200'}`}>
                   {config.actualIsOpen ? 'ABERTO' : 'FECHADO'}
                 </span>
@@ -120,13 +120,13 @@ export default function Home() {
             )}
           </div>
           <div className="flex items-center gap-6 text-sm font-medium">
-            <div className="hidden md:flex gap-6 text-zinc-600">
-              <a href="#menu" className="hover:text-orange-600 transition-colors">Cardápio</a>
-              <a href="#about" className="hover:text-orange-600 transition-colors">Localização</a>
+            <div className="hidden md:flex gap-6 text-zinc-300">
+              <a href="#menu" className="hover:text-orange-500 transition-colors">Cardápio</a>
+              <a href="#about" className="hover:text-orange-500 transition-colors">Localização</a>
             </div>
             <button
               onClick={() => setIsCartOpen(true)}
-              className="relative flex items-center justify-center bg-gray-100 hover:bg-orange-50 border border-gray-200 hover:border-orange-200 transition-colors p-3 rounded-full shadow-sm cursor-pointer"
+              className="relative flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-orange-500 transition-colors p-3 rounded-full shadow-sm cursor-pointer"
             >
               <span className="sr-only">Carrinho</span>
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-orange-600">
@@ -365,8 +365,8 @@ export default function Home() {
       )}
 
       {/* Hero Section */}
-      <section className="relative pt-32 pb-24 px-6 overflow-hidden flex flex-col items-center text-center bg-white border-b border-gray-200 shadow-sm mt-20">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(234,88,12,0.05)_0%,transparent_70%)] pointer-events-none" />
+      <section className="relative pt-32 pb-24 px-6 overflow-hidden flex flex-col items-center text-center border-b border-zinc-800 shadow-sm mt-20">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(234,88,12,0.1)_0%,transparent_70%)] pointer-events-none" />
 
         {isMounted && !config.actualIsOpen && (
           <div className="w-full max-w-2xl bg-red-50 mb-8 border border-red-200 text-red-600 px-6 py-4 rounded-xl font-bold flex items-center justify-center gap-3 shadow-sm animate-fade-in mx-auto relative z-20">
@@ -376,10 +376,10 @@ export default function Home() {
         )}
 
         <span className="text-sm font-bold tracking-widest uppercase text-orange-600 mb-4 bg-orange-50 px-4 py-1.5 rounded-full border border-orange-100">Bateu a fome?</span>
-        <h1 className="text-5xl md:text-7xl font-black tracking-tighter mb-6 text-zinc-900 drop-shadow-sm">
-          O Melhor <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-amber-500">Xis</span> da Cidade.
+        <h1 className="text-5xl md:text-7xl font-black tracking-tighter mb-6 text-white drop-shadow-sm">
+          O Melhor <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-500">Xis</span> da Cidade.
         </h1>
-        <p className="text-lg md:text-xl text-zinc-600 max-w-2xl font-medium mb-10">
+        <p className="text-lg md:text-xl text-zinc-300 max-w-2xl font-medium mb-10">
           Lanches gigantes, porções generosas e aquele sabor caseiro que só a <strong>{config.storeName}</strong> tem. Peça agora e se surpreenda!
         </p>
         <div className="flex flex-col sm:flex-row gap-4">
@@ -391,7 +391,7 @@ export default function Home() {
           </a>
           <a
             href="#about"
-            className="px-8 py-4 bg-gray-100 text-zinc-800 font-bold rounded-full hover:bg-gray-200 transition-all duration-300 text-lg"
+            className="px-8 py-4 bg-zinc-800 text-white font-bold rounded-full hover:bg-zinc-700 transition-all duration-300 text-lg border border-zinc-700 hover:border-zinc-600 shadow-md"
           >
             Nossa Localização
           </a>
@@ -401,8 +401,8 @@ export default function Home() {
       {/* Menu Section */}
       <section id="menu" className="py-20 px-6 max-w-5xl mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-black text-zinc-900 tracking-tight">Nosso Cardápio</h2>
-          <div className="h-1.5 w-24 bg-orange-500 mx-auto mt-6 rounded-full"></div>
+          <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight">Nosso Cardápio</h2>
+          <div className="h-1.5 w-24 bg-gradient-to-r from-orange-500 to-amber-500 mx-auto mt-6 rounded-full"></div>
         </div>
 
         <div className="space-y-24">
@@ -413,43 +413,43 @@ export default function Home() {
             return (
               <div key={category.id}>
                 <div className="flex items-center gap-4 mb-8">
-                  <h3 className="text-3xl font-black text-zinc-800">
+                  <h3 className="text-3xl font-black text-white">
                     {category.name}
                   </h3>
-                  <div className="flex-1 h-px bg-gray-200"></div>
+                  <div className="flex-1 h-px bg-zinc-800"></div>
                 </div>
 
                 <div className="grid gap-6 md:grid-cols-2">
                   {categoryItems.map((item) => (
                     <div
                       key={item.id}
-                      className="group bg-white p-6 rounded-[2rem] border border-gray-100 shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 relative flex flex-col h-full overflow-hidden"
+                      className="group bg-zinc-900/80 backdrop-blur-md p-6 rounded-[2rem] border border-zinc-800 shadow-lg hover:shadow-2xl hover:border-orange-500/30 hover:-translate-y-2 transition-all duration-300 relative flex flex-col h-full overflow-hidden"
                     >
                       <div className="flex-1 relative z-10 flex flex-col h-full">
                         {item.imageUrl ? (
-                          <div className="relative w-full h-48 mb-4 rounded-xl overflow-hidden bg-gray-100 shrink-0">
+                          <div className="relative w-full h-48 mb-4 rounded-xl overflow-hidden bg-zinc-800 shrink-0">
                             <Image src={item.imageUrl} alt={item.name} fill className="object-cover" />
                           </div>
                         ) : (
-                          <div className="w-full h-48 mb-4 rounded-xl bg-gray-50 flex flex-col items-center justify-center text-zinc-400 border-2 border-dashed border-gray-200 shrink-0">
+                          <div className="w-full h-48 mb-4 rounded-xl bg-zinc-800/50 flex flex-col items-center justify-center text-zinc-500 border-2 border-dashed border-zinc-700 shrink-0">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-10 h-10 mb-2 opacity-30"><path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" /></svg>
                             <span className="text-xs font-semibold opacity-40">Em breve</span>
                           </div>
                         )}
                         <div className="flex justify-between items-start mb-3 gap-4">
                           <div className="flex flex-col gap-1.5">
-                            <h4 className="text-xl font-bold text-zinc-900 leading-tight group-hover:text-orange-600 transition-colors">{item.name}</h4>
+                            <h4 className="text-xl font-bold text-white leading-tight group-hover:text-orange-500 transition-colors">{item.name}</h4>
                           </div>
-                          <span className="text-orange-600 font-black text-xl whitespace-nowrap">R$ {item.price.toFixed(2).replace('.', ',')}</span>
+                          <span className="text-orange-500 font-black text-xl whitespace-nowrap">R$ {item.price.toFixed(2).replace('.', ',')}</span>
                         </div>
-                        <p className="text-sm text-zinc-500 mt-2 mb-6 leading-relaxed">
+                        <p className="text-sm text-zinc-400 mt-2 mb-6 leading-relaxed">
                           {item.description}
                         </p>
                       </div>
 
                       <button
                         onClick={() => handleOpenModal({ name: item.name, price: item.price })}
-                        className="mt-auto relative z-10 w-full bg-orange-50 hover:bg-orange-500 hover:text-white text-orange-600 font-bold py-3.5 rounded-2xl border border-orange-100 hover:border-orange-500 transition-all duration-300 flex justify-center items-center gap-2 hover:shadow-lg"
+                        className="mt-auto relative z-10 w-full bg-zinc-800 hover:bg-gradient-to-r hover:from-orange-500 hover:to-orange-600 text-white font-bold py-3.5 rounded-2xl border border-zinc-700 hover:border-transparent transition-all duration-300 flex justify-center items-center gap-2 hover:shadow-lg hover:shadow-orange-500/25"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
                           <path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" />
