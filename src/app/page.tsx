@@ -145,7 +145,7 @@ export default function Home() {
       {/* Item Selection Modal */}
       {isModalOpen && selectedItem && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl relative">
+          <div className="bg-white rounded-[2rem] w-full max-w-md overflow-hidden shadow-2xl relative">
             <div className="p-6 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
               <h3 className="font-bold text-xl text-zinc-900">{selectedItem.name}</h3>
               <button onClick={() => setIsModalOpen(false)} className="text-zinc-400 hover:text-red-500 text-2xl leading-none">&times;</button>
@@ -173,7 +173,7 @@ export default function Home() {
                   value={itemObservation}
                   onChange={(e) => setItemObservation(e.target.value)}
                   placeholder="Ex: Tirar cebola, maionese à parte..."
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm text-zinc-800 focus:outline-none focus:ring-2 focus:ring-orange-500/50 resize-none h-24"
+                  className="w-full bg-gray-50 border border-gray-200 rounded-2xl p-4 text-sm text-zinc-800 focus:outline-none focus:ring-2 focus:ring-orange-500/50 resize-none h-28"
                 />
               </div>
 
@@ -186,7 +186,7 @@ export default function Home() {
             <div className="p-4 border-t border-gray-100 bg-gray-50">
               <button
                 onClick={handleConfirmItem}
-                className="w-full bg-orange-600 text-white font-bold py-3.5 rounded-xl hover:bg-orange-700 transition-colors text-lg"
+                className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white font-black py-4 rounded-2xl hover:from-orange-600 hover:to-orange-700 hover:shadow-lg transition-all text-lg"
               >
                 Confirmar
               </button>
@@ -211,7 +211,7 @@ export default function Home() {
                 <p className="text-zinc-500 text-sm">Seu carrinho está vazio.</p>
               ) : (
                 cartItems.map((item) => (
-                  <div key={item.id} className="bg-gray-50 p-4 rounded-xl border border-gray-100 shadow-sm relative pr-10">
+                  <div key={item.id} className="bg-white p-4 rounded-2xl border border-gray-100 shadow-md relative pr-10 hover:shadow-lg transition-all">
                     <button
                       onClick={() => removeItem(item.id)}
                       className="absolute top-4 right-4 text-zinc-300 hover:text-red-500 transition-colors"
@@ -385,7 +385,7 @@ export default function Home() {
         <div className="flex flex-col sm:flex-row gap-4">
           <a
             href="#menu"
-            className="px-8 py-4 bg-orange-600 text-white font-bold rounded-full hover:bg-orange-700 hover:shadow-[0_8px_25px_rgba(234,88,12,0.4)] hover:-translate-y-1 transition-all duration-300 text-lg"
+            className="px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-black rounded-full hover:shadow-[0_8px_25px_rgba(234,88,12,0.4)] hover:-translate-y-1 transition-all duration-300 text-lg"
           >
             Ver o Cardápio
           </a>
@@ -423,7 +423,7 @@ export default function Home() {
                   {categoryItems.map((item) => (
                     <div
                       key={item.id}
-                      className="group bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative flex flex-col h-full"
+                      className="group bg-white p-6 rounded-[2rem] border border-gray-100 shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 relative flex flex-col h-full overflow-hidden"
                     >
                       <div className="flex-1 relative z-10 flex flex-col h-full">
                         {item.imageUrl ? (
@@ -449,7 +449,7 @@ export default function Home() {
 
                       <button
                         onClick={() => handleOpenModal({ name: item.name, price: item.price })}
-                        className="mt-auto relative z-10 w-full bg-orange-50 hover:bg-orange-600 hover:text-white text-orange-600 font-bold py-3 rounded-xl border border-orange-100 hover:border-orange-600 transition-all duration-300 flex justify-center items-center gap-2"
+                        className="mt-auto relative z-10 w-full bg-orange-50 hover:bg-orange-500 hover:text-white text-orange-600 font-bold py-3.5 rounded-2xl border border-orange-100 hover:border-orange-500 transition-all duration-300 flex justify-center items-center gap-2 hover:shadow-lg"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
                           <path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" />
