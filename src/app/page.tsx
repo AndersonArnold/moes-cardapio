@@ -60,7 +60,7 @@ export default function Home() {
   };
 
   const handleCheckout = () => {
-    if (!config.isOpen) {
+    if (!config.actualIsOpen) {
       alert("Desculpe, a loja está fechada no momento.");
       return;
     }
@@ -110,7 +110,14 @@ export default function Home() {
             ) : (
               <span>🍔</span>
             )}
-            {isMounted && <span className="text-zinc-900 text-lg sm:text-2xl">{config.storeName}</span>}
+            {isMounted && (
+              <div className="flex items-center gap-3">
+                <span className="text-zinc-900 text-lg sm:text-2xl">{config.storeName}</span>
+                <span className={`text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full ${config.actualIsOpen ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-red-100 text-red-700 border border-red-200'}`}>
+                  {config.actualIsOpen ? 'ABERTO' : 'FECHADO'}
+                </span>
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-6 text-sm font-medium">
             <div className="hidden md:flex gap-6 text-zinc-600">
@@ -321,6 +328,12 @@ export default function Home() {
           {/* Footer Action */}
           {cartItems.length > 0 && (
             <div className="p-6 border-t border-gray-200 bg-gray-50 drop-shadow-[0_-5px_10px_rgba(0,0,0,0.02)]">
+              {!config.actualIsOpen && (
+                <div className="mb-4 bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm leading-relaxed text-center font-bold shadow-sm">
+                  Poxa, as portas do Moe's estão fechadas agora! 🛑<br /><br />
+                  <span className="font-medium text-red-600">Mas não fique triste! Voltamos a preparar os melhores lanches da cidade de terça a domingo, das 18h30 às 22h30. Já vai escolhendo o seu!</span>
+                </div>
+              )}
               <div className="flex justify-between items-center mb-4">
                 <span className="text-zinc-500 font-medium">Total do Pedido {orderType === 'delivery' && <span className="text-xs font-normal">(+Entrega)</span>}</span>
                 <span className="text-2xl font-black text-orange-600">
@@ -328,11 +341,11 @@ export default function Home() {
                 </span>
               </div>
               <button
-                disabled={!config.isOpen}
+                disabled={!config.actualIsOpen}
                 onClick={handleCheckout}
-                className={`w-full text-white font-bold py-4 rounded-xl shadow-lg transition-all transform active:scale-[0.98] text-lg flex items-center justify-center gap-2 ${!config.isOpen ? 'bg-red-500 hover:bg-red-600 cursor-not-allowed shadow-red-500/30' : 'bg-green-600 hover:bg-green-700 shadow-green-600/30'}`}
+                className={`w-full text-white font-bold py-4 rounded-xl shadow-lg transition-all transform active:scale-[0.98] text-lg flex items-center justify-center gap-2 ${!config.actualIsOpen ? 'bg-red-500 hover:bg-red-600 cursor-not-allowed shadow-red-500/30' : 'bg-green-600 hover:bg-green-700 shadow-green-600/30'}`}
               >
-                {!config.isOpen ? (
+                {!config.actualIsOpen ? (
                   <>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6"><path fillRule="evenodd" d="M12 1.5a5.25 5.25 0 0 0-5.25 5.25v3a3 3 0 0 0-3 3v6.75a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3v-6.75a3 3 0 0 0-3-3v-3c0-2.9-2.35-5.25-5.25-5.25Zm3.75 8.25v-3a3.75 3.75 0 1 0-7.5 0v3h7.5Z" clipRule="evenodd" /></svg>
                     Loja Fechada
@@ -355,7 +368,7 @@ export default function Home() {
       <section className="relative pt-32 pb-24 px-6 overflow-hidden flex flex-col items-center text-center bg-white border-b border-gray-200 shadow-sm mt-20">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(234,88,12,0.05)_0%,transparent_70%)] pointer-events-none" />
 
-        {isMounted && !config.isOpen && (
+        {isMounted && !config.actualIsOpen && (
           <div className="w-full max-w-2xl bg-red-50 mb-8 border border-red-200 text-red-600 px-6 py-4 rounded-xl font-bold flex items-center justify-center gap-3 shadow-sm animate-fade-in mx-auto relative z-20">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6"><path fillRule="evenodd" d="M12 1.5a5.25 5.25 0 0 0-5.25 5.25v3a3 3 0 0 0-3 3v6.75a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3v-6.75a3 3 0 0 0-3-3v-3c0-2.9-2.35-5.25-5.25-5.25Zm3.75 8.25v-3a3.75 3.75 0 1 0-7.5 0v3h7.5Z" clipRule="evenodd" /></svg>
             <span>Estamos Fechados no Momento. Voltamos logo!</span>

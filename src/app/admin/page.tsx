@@ -435,14 +435,28 @@ export default function AdminPage() {
                             <div className="border-t border-gray-100 pt-6 flex items-center justify-between">
                                 <div>
                                     <label className="block text-base font-black text-zinc-900 mb-1">Status do Restaurante</label>
-                                    <p className="text-xs text-zinc-500">Se fechado, os clientes não poderão finalizar pedidos.</p>
+                                    <p className="text-xs text-zinc-500 mb-2">Se configurado, sobrepõe os dias e horários automáticos da loja.</p>
+                                    <div className="inline-flex bg-gray-100 p-1 rounded-xl gap-1">
+                                        <button
+                                            onClick={() => config.updateConfig({ statusOverride: 'AUTOMATIC' })}
+                                            className={`px-4 py-2 text-sm font-bold rounded-lg transition-all ${config.statusOverride === 'AUTOMATIC' ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-500 hover:text-zinc-700'}`}
+                                        >
+                                            Automático
+                                        </button>
+                                        <button
+                                            onClick={() => config.updateConfig({ statusOverride: 'FORCE_OPEN' })}
+                                            className={`px-4 py-2 text-sm font-bold rounded-lg transition-all ${config.statusOverride === 'FORCE_OPEN' ? 'bg-green-500 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-700'}`}
+                                        >
+                                            Forçar Aberto
+                                        </button>
+                                        <button
+                                            onClick={() => config.updateConfig({ statusOverride: 'FORCE_CLOSED' })}
+                                            className={`px-4 py-2 text-sm font-bold rounded-lg transition-all ${config.statusOverride === 'FORCE_CLOSED' ? 'bg-red-500 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-700'}`}
+                                        >
+                                            Forçar Fechado
+                                        </button>
+                                    </div>
                                 </div>
-                                <button
-                                    onClick={() => config.updateConfig({ isOpen: !config.isOpen })}
-                                    className={`px-6 py-3 rounded-full font-bold transition-all text-white ${config.isOpen ? 'bg-green-500 shadow-[0_0_15px_rgba(34,197,94,0.3)]' : 'bg-red-500 shadow-[0_0_15px_rgba(239,68,68,0.3)]'}`}
-                                >
-                                    {config.isOpen ? 'ABERTO' : 'FECHADO'}
-                                </button>
                             </div>
 
                         </div>
