@@ -271,6 +271,12 @@ export default function AdminPage() {
                                     </button>
                                 )}
                                 <button
+                                    onClick={handleCreateCategory}
+                                    className="bg-zinc-800 text-white font-bold py-3 px-6 rounded-xl hover:bg-zinc-900 transition-colors shadow-sm whitespace-nowrap"
+                                >
+                                    + Nova Categoria
+                                </button>
+                                <button
                                     onClick={handleCreateClick}
                                     disabled={categories.length === 0}
                                     className="bg-orange-600 text-white font-bold py-3 px-6 rounded-xl hover:bg-orange-700 transition-colors shadow-sm whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
