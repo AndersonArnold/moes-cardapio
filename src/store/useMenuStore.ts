@@ -9,11 +9,13 @@ export interface MenuItem {
     price: number;
     imageUrl?: string;
     isPopular?: boolean;
+    sortOrder?: number;
 }
 
 export interface Category {
     id: string;
     name: string;
+    sortOrder?: number;
 }
 
 interface MenuStore {
@@ -27,7 +29,9 @@ interface MenuStore {
     deleteItem: (id: string) => Promise<void>;
     addCategory: (category: Omit<Category, 'id'>) => Promise<void>;
     updateCategory: (id: string, category: Partial<Category>) => Promise<void>;
+    updateCategoryOrder: (categories: Category[]) => Promise<void>;
     deleteCategory: (id: string) => Promise<void>;
+    updateProductOrder: (products: MenuItem[]) => Promise<void>;
     seedCategories: () => Promise<void>;
     seedProducts: () => Promise<void>;
 }
@@ -41,8 +45,8 @@ export const useMenuStore = create<MenuStore>((set, get) => ({
         set({ isLoading: true });
 
         const [categoriesRes, productsRes] = await Promise.all([
-            supabase.from('categories').select('*').order('created_at', { ascending: true }),
-            supabase.from('products').select('*').order('created_at', { ascending: true })
+            supabase.from('categories').select('*').order('sort_order', { ascending: true }),
+            supabase.from('products').select('*').order('sort_order', { ascending: true })
         ]);
 
         if (categoriesRes.data && productsRes.data) {
@@ -53,10 +57,16 @@ export const useMenuStore = create<MenuStore>((set, get) => ({
                 description: p.description,
                 price: p.price,
                 imageUrl: p.image_url,
-                isPopular: p.is_popular
+                isPopular: p.is_popular,
+                sortOrder: p.sort_order
+            }));
+            const mappedCategories = categoriesRes.data.map((c: any) => ({
+                id: c.id,
+                name: c.name,
+                sortOrder: c.sort_order
             }));
 
-            set({ categories: categoriesRes.data, items: mappedProducts });
+            set({ categories: mappedCategories, items: mappedProducts });
         } else {
             console.error("Error fetching menu data", categoriesRes.error, productsRes.error);
         }
@@ -77,6 +87,9 @@ export const useMenuStore = create<MenuStore>((set, get) => ({
     },
 
     addItem: async (itemData) => {
+        const currentCategoryItems = get().items.filter(i => i.categoryId === itemData.categoryId);
+        const nextOrder = currentCategoryItems.length;
+
         const { data, error } = await supabase.from('products').insert([
             {
                 category_id: itemData.categoryId,
@@ -84,7 +97,8 @@ export const useMenuStore = create<MenuStore>((set, get) => ({
                 description: itemData.description,
                 price: itemData.price,
                 image_url: itemData.imageUrl,
-                is_popular: itemData.isPopular
+                is_popular: itemData.isPopular,
+                sort_order: nextOrder
             }
         ]).select().single();
 
@@ -96,7 +110,8 @@ export const useMenuStore = create<MenuStore>((set, get) => ({
                 description: data.description,
                 price: data.price,
                 imageUrl: data.image_url,
-                isPopular: data.is_popular
+                isPopular: data.is_popular,
+                sortOrder: data.sort_order
             };
             set((state) => ({ items: [...state.items, newItem] }));
         } else {
@@ -135,10 +150,11 @@ export const useMenuStore = create<MenuStore>((set, get) => ({
     },
 
     addCategory: async (catData) => {
-        const { data, error } = await supabase.from('categories').insert([{ name: catData.name }]).select().single();
+        const nextOrder = get().categories.length;
+        const { data, error } = await supabase.from('categories').insert([{ name: catData.name, sort_order: nextOrder }]).select().single();
         if (data && !error) {
             set((state) => ({
-                categories: [...state.categories, data]
+                categories: [...state.categories, { id: data.id, name: data.name, sortOrder: data.sort_order }]
             }));
         } else {
             console.error("Error adding category", error);
@@ -154,6 +170,32 @@ export const useMenuStore = create<MenuStore>((set, get) => ({
         } else {
             console.error("Error updating category", error);
         }
+    },
+
+    updateCategoryOrder: async (orderedCategories) => {
+        set({ categories: orderedCategories });
+        const updates = orderedCategories.map((cat, index) =>
+            supabase.from('categories').update({ sort_order: index }).eq('id', cat.id)
+        );
+        await Promise.all(updates);
+    },
+
+    updateProductOrder: async (orderedProductsSubset) => {
+        set((state) => {
+            const updatedItems = [...state.items];
+            orderedProductsSubset.forEach((updatedItem, index) => {
+                const itemIndex = updatedItems.findIndex(i => i.id === updatedItem.id);
+                if (itemIndex > -1) {
+                    updatedItems[itemIndex] = { ...updatedItem, sortOrder: index };
+                }
+            });
+            return { items: updatedItems.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)) };
+        });
+
+        const updates = orderedProductsSubset.map((item, index) =>
+            supabase.from('products').update({ sort_order: index }).eq('id', item.id)
+        );
+        await Promise.all(updates);
     },
 
     deleteCategory: async (id) => {
@@ -173,19 +215,24 @@ export const useMenuStore = create<MenuStore>((set, get) => ({
     seedCategories: async () => {
         set({ isLoading: true });
         const defaultCategories = [
-            { name: "Lanches" },
-            { name: "Porções" },
-            { name: "Pastéis" },
-            { name: "Refrigerantes" },
-            { name: "Cervejas e Energéticos" },
-            { name: "Extras" }
+            { name: "Lanches", sort_order: 0 },
+            { name: "Porções", sort_order: 1 },
+            { name: "Pastéis", sort_order: 2 },
+            { name: "Refrigerantes", sort_order: 3 },
+            { name: "Cervejas e Energéticos", sort_order: 4 },
+            { name: "Extras", sort_order: 5 }
         ];
 
         const { data, error } = await supabase.from('categories').insert(defaultCategories).select();
 
         if (data && !error) {
+            const mappedData = data.map((c: any) => ({
+                id: c.id,
+                name: c.name,
+                sortOrder: c.sort_order
+            }));
             set((state) => ({
-                categories: [...state.categories, ...data]
+                categories: [...state.categories, ...mappedData]
             }));
         } else {
             console.error("Error seeding categories", error);
@@ -214,19 +261,26 @@ export const useMenuStore = create<MenuStore>((set, get) => ({
 
         const { menuItems } = await import('../data/mockData');
 
+        const categoryCounts: Record<string, number> = {};
         const productsToInsert = menuItems.map(item => {
             const targetName = categoryMap[item.categoryId];
             const dbCategory = stateCategories.find(c => c.name === targetName);
 
-            return {
-                category_id: dbCategory?.id,
-                name: item.name,
-                description: item.description,
-                price: item.price,
-                image_url: null,
-                is_popular: false
-            };
-        }).filter(p => p.category_id);
+            if (dbCategory) {
+                if (categoryCounts[dbCategory.id] === undefined) categoryCounts[dbCategory.id] = 0;
+                const sort_order = categoryCounts[dbCategory.id]++;
+                return {
+                    category_id: dbCategory.id,
+                    name: item.name,
+                    description: item.description,
+                    price: item.price,
+                    image_url: null,
+                    is_popular: false,
+                    sort_order: sort_order
+                };
+            }
+            return null;
+        }).filter(p => p !== null);
 
         if (productsToInsert.length > 0) {
             const { data, error } = await supabase.from('products').insert(productsToInsert).select();
@@ -239,7 +293,8 @@ export const useMenuStore = create<MenuStore>((set, get) => ({
                     description: p.description,
                     price: p.price,
                     imageUrl: p.image_url,
-                    isPopular: p.is_popular
+                    isPopular: p.is_popular,
+                    sortOrder: p.sort_order
                 }));
                 set((state) => ({ items: [...state.items, ...mappedProducts] }));
             } else {

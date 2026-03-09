@@ -6,11 +6,16 @@ import { useStoreConfig } from "../../store/useStoreConfig";
 import Image from "next/image";
 
 export default function AdminPage() {
-    const { items, categories, updateItemImage, addItem, updateItem, deleteItem, fetchMenu, seedCategories, seedProducts, isLoading } = useMenuStore();
+    const { items, categories, updateItemImage, addItem, updateItem, deleteItem, fetchMenu, seedCategories, seedProducts, isLoading, addCategory, updateCategory, deleteCategory, updateCategoryOrder, updateProductOrder } = useMenuStore();
     const config = useStoreConfig();
 
     const [isMounted, setIsMounted] = useState(false);
     const [activeTab, setActiveTab] = useState<'menu' | 'settings'>('menu');
+
+    // Category Modal State
+    const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+    const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
+    const [categoryName, setCategoryName] = useState("");
 
     // CRUD Modal State
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -146,6 +151,65 @@ export default function AdminPage() {
         }
     };
 
+    const moveCategoryUp = (index: number) => {
+        if (index === 0) return;
+        const newCategories = [...categories];
+        [newCategories[index], newCategories[index - 1]] = [newCategories[index - 1], newCategories[index]];
+        updateCategoryOrder(newCategories);
+    };
+
+    const moveCategoryDown = (index: number) => {
+        if (index === categories.length - 1) return;
+        const newCategories = [...categories];
+        [newCategories[index], newCategories[index + 1]] = [newCategories[index + 1], newCategories[index]];
+        updateCategoryOrder(newCategories);
+    };
+
+    const moveProductUp = (categoryItems: any[], index: number) => {
+        if (index === 0) return;
+        const newOrder = [...categoryItems];
+        [newOrder[index], newOrder[index - 1]] = [newOrder[index - 1], newOrder[index]];
+        updateProductOrder(newOrder);
+    };
+
+    const moveProductDown = (categoryItems: any[], index: number) => {
+        if (index === categoryItems.length - 1) return;
+        const newOrder = [...categoryItems];
+        [newOrder[index], newOrder[index + 1]] = [newOrder[index + 1], newOrder[index]];
+        updateProductOrder(newOrder);
+    };
+
+    const handleCreateCategory = () => {
+        setEditingCategoryId(null);
+        setCategoryName("");
+        setIsCategoryModalOpen(true);
+    };
+
+    const handleEditCategoryClick = (category: any) => {
+        setEditingCategoryId(category.id);
+        setCategoryName(category.name);
+        setIsCategoryModalOpen(true);
+    };
+
+    const handleSaveCategory = () => {
+        if (!categoryName.trim()) {
+            alert("Preencha o nome da categoria.");
+            return;
+        }
+        if (editingCategoryId) {
+            updateCategory(editingCategoryId, { name: categoryName.trim() });
+        } else {
+            addCategory({ name: categoryName.trim() });
+        }
+        setIsCategoryModalOpen(false);
+    };
+
+    const handleDeleteCategoryClick = (id: string, name: string) => {
+        if (confirm(`Tem certeza que deseja excluir "${name}"? Os produtos associados a ela também não serão exibidos.`)) {
+            deleteCategory(id);
+        }
+    };
+
     if (!isMounted) return <div className="p-10 font-sans">Carregando painel admin...</div>;
 
     return (
@@ -233,20 +297,45 @@ export default function AdminPage() {
                                 </button>
                             </div>
                         ) : (
-                            categories.map(category => {
+                            categories.map((category, catIndex) => {
                                 const categoryItems = items.filter(item => item.categoryId === category.id);
+
+                                const categoryHeader = (
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
+                                        <h2 className="text-2xl font-bold border-l-4 border-orange-500 pl-4">{category.name}</h2>
+                                        <div className="flex items-center bg-white border border-gray-200 rounded-lg p-1 shadow-sm sm:ml-auto w-fit">
+                                            <button onClick={() => moveCategoryUp(catIndex)} disabled={catIndex === 0} className={`p-1.5 rounded-md transition-colors ${catIndex === 0 ? 'text-gray-300' : 'text-zinc-500 hover:text-orange-600 hover:bg-orange-50'}`} title="Subir Categoria">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 10.5 12 3m0 0 7.5 7.5M12 3v18" /></svg>
+                                            </button>
+                                            <button onClick={() => moveCategoryDown(catIndex)} disabled={catIndex === categories.length - 1} className={`p-1.5 rounded-md transition-colors ${catIndex === categories.length - 1 ? 'text-gray-300' : 'text-zinc-500 hover:text-orange-600 hover:bg-orange-50'}`} title="Descer Categoria">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3" /></svg>
+                                            </button>
+                                            <div className="w-px h-5 bg-gray-200 mx-1"></div>
+                                            <button onClick={() => handleEditCategoryClick(category)} className="p-1.5 text-zinc-500 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors flex items-center gap-1.5 px-3 text-sm font-bold" title="Editar Nome">
+                                                <svg className="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" /></svg>
+                                                Editar
+                                            </button>
+                                            <div className="w-px h-5 bg-gray-200 mx-1"></div>
+                                            <button onClick={() => handleDeleteCategoryClick(category.id, category.name)} className="p-1.5 text-zinc-500 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors flex items-center gap-1.5 px-3 text-sm font-bold" title="Excluir Categoria">
+                                                <svg className="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>
+                                                Excluir
+                                            </button>
+                                        </div>
+                                    </div>
+                                );
+
                                 if (categoryItems.length === 0) return (
                                     <div key={category.id}>
-                                        <h2 className="text-2xl font-bold border-l-4 border-orange-500 pl-4 mb-6">{category.name}</h2>
+                                        {categoryHeader}
                                         <p className="text-zinc-500 text-sm italic mb-6">Nenhum produto cadastrado nesta categoria ainda.</p>
                                     </div>
                                 );
 
                                 return (
                                     <div key={category.id}>
-                                        <h2 className="text-2xl font-bold border-l-4 border-orange-500 pl-4 mb-6">{category.name}</h2>
+                                        {categoryHeader}
                                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                                            {categoryItems.map(item => (
+                                            {categoryItems.map((item, itemIndex) => (
                                                 <div
                                                     key={item.id}
                                                     className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow relative group flex flex-col h-full"
@@ -276,10 +365,28 @@ export default function AdminPage() {
                                                             ) : (
                                                                 <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-sm">SEM FOTO</span>
                                                             )}
-                                                            <div className="flex gap-3">
+                                                            <div className="flex items-center gap-1.5">
+                                                                <div className="flex bg-gray-50 border border-gray-200 rounded p-0.5 mr-1">
+                                                                    <button
+                                                                        onClick={(e) => { e.stopPropagation(); moveProductUp(categoryItems, itemIndex); }}
+                                                                        disabled={itemIndex === 0}
+                                                                        className={`p-1 rounded ${itemIndex === 0 ? 'text-gray-200' : 'text-zinc-400 hover:text-orange-600 hover:bg-orange-50'}`}
+                                                                        title="Subir na Categoria"
+                                                                    >
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className="w-3 h-3"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 10.5 12 3m0 0 7.5 7.5M12 3v18" /></svg>
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={(e) => { e.stopPropagation(); moveProductDown(categoryItems, itemIndex); }}
+                                                                        disabled={itemIndex === categoryItems.length - 1}
+                                                                        className={`p-1 rounded ${itemIndex === categoryItems.length - 1 ? 'text-gray-200' : 'text-zinc-400 hover:text-orange-600 hover:bg-orange-50'}`}
+                                                                        title="Descer na Categoria"
+                                                                    >
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className="w-3 h-3"><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3" /></svg>
+                                                                    </button>
+                                                                </div>
                                                                 <button
                                                                     onClick={(e) => { e.stopPropagation(); handleEditClick(item); }}
-                                                                    className="text-zinc-400 hover:text-orange-600 transition-colors"
+                                                                    className="text-zinc-400 hover:text-orange-600 transition-colors p-1"
                                                                     title="Editar"
                                                                 >
                                                                     <svg className="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -574,6 +681,43 @@ export default function AdminPage() {
                                 className="bg-orange-600 text-white font-bold py-2.5 px-6 rounded-xl hover:bg-orange-700 transition-colors disabled:opacity-50 shadow-sm shadow-orange-600/20"
                             >
                                 {editingId ? "Salvar Alterações" : "Adicionar Produto"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Category CRUD Modal */}
+            {isCategoryModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+                    <div className="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl relative">
+                        <div className="p-6 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+                            <h3 className="font-bold text-xl text-zinc-900">{editingCategoryId ? "Editar Categoria" : "Nova Categoria"}</h3>
+                            <button onClick={() => setIsCategoryModalOpen(false)} className="text-zinc-400 hover:text-red-500 text-2xl leading-none">&times;</button>
+                        </div>
+                        <div className="p-6">
+                            <label className="block text-sm font-bold text-zinc-700 mb-2">Nome da Categoria *</label>
+                            <input
+                                type="text"
+                                value={categoryName}
+                                onChange={(e) => setCategoryName(e.target.value)}
+                                className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm text-zinc-900 font-medium focus:ring-2 focus:ring-orange-500 outline-none"
+                                placeholder="Ex: Bebidas"
+                                autoFocus
+                            />
+                        </div>
+                        <div className="p-6 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
+                            <button
+                                onClick={() => setIsCategoryModalOpen(false)}
+                                className="bg-white border border-gray-200 text-zinc-700 font-bold py-2.5 px-5 rounded-xl hover:bg-gray-100 transition-colors"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={handleSaveCategory}
+                                className="bg-orange-600 text-white font-bold py-2.5 px-6 rounded-xl hover:bg-orange-700 transition-colors shadow-sm"
+                            >
+                                Salvar
                             </button>
                         </div>
                     </div>
