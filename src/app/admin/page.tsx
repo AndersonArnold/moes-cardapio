@@ -12,6 +12,11 @@ export default function AdminPage() {
     const [isMounted, setIsMounted] = useState(false);
     const [activeTab, setActiveTab] = useState<'menu' | 'settings'>('menu');
 
+    // Auth State
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [passwordInput, setPasswordInput] = useState("");
+    const [loginError, setLoginError] = useState("");
+
     // Category Modal State
     const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
     const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
@@ -38,7 +43,22 @@ export default function AdminPage() {
         setIsMounted(true);
         fetchMenu();
         config.fetchConfig();
+
+        if (sessionStorage.getItem('adminAuth') === 'true') {
+            setIsAuthenticated(true);
+        }
     }, [fetchMenu, config.fetchConfig]);
+
+    const handleLogin = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (passwordInput === "Tattoo66$") {
+            setIsAuthenticated(true);
+            sessionStorage.setItem('adminAuth', 'true');
+            setLoginError("");
+        } else {
+            setLoginError("Senha incorreta.");
+        }
+    };
 
     useEffect(() => {
         if (categories.length > 0 && !formData.categoryId) {
@@ -211,6 +231,46 @@ export default function AdminPage() {
     };
 
     if (!isMounted) return <div className="p-10 font-sans">Carregando painel admin...</div>;
+
+    if (!isAuthenticated) {
+        return (
+            <div className="min-h-screen bg-[#0f0f11] flex flex-col items-center justify-center p-4 font-sans">
+                <div className="w-full max-w-sm bg-[#18181b] border border-zinc-800 rounded-2xl p-8 shadow-2xl">
+                    <div className="text-center mb-8">
+                        <div className="w-16 h-16 bg-zinc-900 rounded-2xl mx-auto flex items-center justify-center mb-4 border border-zinc-800">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8 text-orange-500">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+                            </svg>
+                        </div>
+                        <h1 className="text-2xl font-black text-white">Acesso Restrito</h1>
+                        <p className="text-zinc-500 text-sm mt-2">Área administrativa exclusiva</p>
+                    </div>
+
+                    <form onSubmit={handleLogin} className="space-y-6">
+                        <div>
+                            <label className="block text-sm font-bold text-zinc-400 mb-2">Senha de Acesso</label>
+                            <input
+                                type="password"
+                                value={passwordInput}
+                                onChange={(e) => setPasswordInput(e.target.value)}
+                                className="w-full bg-[#0a0a0a] border border-zinc-800 rounded-xl p-3 text-white font-medium focus:ring-2 focus:ring-orange-500 outline-none transition-all placeholder:text-zinc-700"
+                                placeholder="Digite a senha"
+                                autoFocus
+                            />
+                            {loginError && <p className="text-red-500 text-sm font-bold mt-2">{loginError}</p>}
+                        </div>
+
+                        <button
+                            type="submit"
+                            className="w-full bg-orange-600 hover:bg-orange-700 text-white font-black py-3 rounded-xl transition-colors shadow-lg shadow-orange-600/20"
+                        >
+                            Entrar
+                        </button>
+                    </form>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gray-50 text-zinc-900 font-sans font-medium px-6 py-12">
