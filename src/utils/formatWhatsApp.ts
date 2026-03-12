@@ -8,6 +8,7 @@ interface OrderData {
     orderType: 'delivery' | 'pickup';
     storeName: string;
     customerName: string;
+    customerPhone: string;
     address?: {
         street: string;
         number: string;
@@ -21,7 +22,10 @@ export const formatWhatsAppMessage = (data: OrderData): string => {
     let message = `🍔 *NOVO PEDIDO - ${data.storeName.toUpperCase()}*\n\n`;
 
     if (data.customerName) {
-        message += `*Cliente:* ${data.customerName}\n\n`;
+        message += `*Cliente:* ${data.customerName}\n`;
+        message += `*WhatsApp:* ${data.customerPhone}\n\n`;
+    } else {
+        message += `\n`;
     }
 
     message += `*Itens do Pedido:*\n`;

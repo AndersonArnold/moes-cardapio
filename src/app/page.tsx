@@ -31,6 +31,7 @@ export default function Home() {
 
   // Checkout State
   const [customerName, setCustomerName] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
   const [orderType, setOrderType] = useState<'delivery' | 'pickup'>('delivery');
   const [address, setAddress] = useState({
     street: "",
@@ -39,6 +40,22 @@ export default function Home() {
     reference: ""
   });
   const [paymentMethod, setPaymentMethod] = useState("Dinheiro");
+
+  useEffect(() => {
+    if (isCartOpen) {
+      const savedData = localStorage.getItem('moes_customer_data');
+      if (savedData) {
+        try {
+          const parsed = JSON.parse(savedData);
+          if (parsed.customerName) setCustomerName(parsed.customerName);
+          if (parsed.customerPhone) setCustomerPhone(parsed.customerPhone);
+          if (parsed.address) setAddress(parsed.address);
+        } catch (e) {
+          console.error("Error loading customer data", e);
+        }
+      }
+    }
+  }, [isCartOpen]);
 
   const handleOpenModal = (item: { name: string, price: number }) => {
     setSelectedItem(item);
@@ -70,12 +87,23 @@ export default function Home() {
       return;
     }
 
+    if (!customerPhone.trim()) {
+      alert("Por favor, informe seu telefone/WhatsApp para o pedido.");
+      return;
+    }
+
     if (orderType === 'delivery' && (!address.street || !address.number || !address.neighborhood || !address.reference)) {
       alert("Por favor, preencha todos os campos do endereço de entrega incluindo ponto de referência.");
       return;
     }
 
     const finalTotal = getCartTotal() + (orderType === 'delivery' ? config.deliveryFee : 0);
+
+    localStorage.setItem('moes_customer_data', JSON.stringify({
+      customerName: customerName.trim(),
+      customerPhone: customerPhone.trim(),
+      address: orderType === 'delivery' ? address : undefined
+    }));
 
     const messageData = {
       items: cartItems,
@@ -85,6 +113,7 @@ export default function Home() {
       orderType,
       storeName: config.storeName,
       customerName: customerName.trim(),
+      customerPhone: customerPhone.trim(),
       address: orderType === 'delivery' ? address : undefined,
       paymentMethod
     };
@@ -242,13 +271,22 @@ export default function Home() {
                 {/* Customer Info */}
                 <div>
                   <h3 className="font-bold text-zinc-800 mb-2">Seus Dados</h3>
-                  <input
-                    type="text"
-                    value={customerName}
-                    onChange={(e) => setCustomerName(e.target.value)}
-                    placeholder="Seu Nome Completo"
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm text-zinc-800 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
-                  />
+                  <div className="space-y-3">
+                    <input
+                      type="text"
+                      value={customerName}
+                      onChange={(e) => setCustomerName(e.target.value)}
+                      placeholder="Seu Nome Completo"
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm text-zinc-800 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                    />
+                    <input
+                      type="tel"
+                      value={customerPhone}
+                      onChange={(e) => setCustomerPhone(e.target.value)}
+                      placeholder="Telefone / WhatsApp"
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm text-zinc-800 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                    />
+                  </div>
                 </div>
 
                 {/* Order Type */}
