@@ -17,6 +17,7 @@ interface OrderData {
     };
     tableNumber?: string;
     peopleCount?: number;
+    glassesCount?: number;
     paymentMethod: string;
 }
 
@@ -25,7 +26,8 @@ export const formatWhatsAppMessage = (data: OrderData): string => {
 
     if (data.orderType === 'dine_in') {
         message += `🚀 *** PEDIDO NA MESA ${data.tableNumber} *** 🚀\n`;
-        message += `*Quantidade de Pessoas:* ${data.peopleCount}\n\n`;
+        message += `*Quantidade de Pessoas:* ${data.peopleCount}\n`;
+        message += `*Número de Copos:* ${data.glassesCount || 0}\n\n`;
     }
 
     if (data.customerName) {
