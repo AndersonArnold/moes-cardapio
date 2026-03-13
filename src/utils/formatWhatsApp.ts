@@ -5,7 +5,7 @@ interface OrderData {
     subtotal: number;
     total: number;
     deliveryFee: number;
-    orderType: 'delivery' | 'pickup';
+    orderType: 'delivery' | 'pickup' | 'dine_in';
     storeName: string;
     customerName: string;
     customerPhone: string;
@@ -15,11 +15,18 @@ interface OrderData {
         neighborhood: string;
         reference: string;
     };
+    tableNumber?: string;
+    peopleCount?: number;
     paymentMethod: string;
 }
 
 export const formatWhatsAppMessage = (data: OrderData): string => {
     let message = `🍔 *NOVO PEDIDO - ${data.storeName.toUpperCase()}*\n\n`;
+
+    if (data.orderType === 'dine_in') {
+        message += `🚀 *** PEDIDO NA MESA ${data.tableNumber} *** 🚀\n`;
+        message += `*Quantidade de Pessoas:* ${data.peopleCount}\n\n`;
+    }
 
     if (data.customerName) {
         message += `*Cliente:* ${data.customerName}\n`;
@@ -45,7 +52,10 @@ export const formatWhatsAppMessage = (data: OrderData): string => {
 
     message += `*TOTAL DA COMPRA:* *R$ ${data.total.toFixed(2).replace('.', ',')}*\n\n`;
 
-    message += `*Tipo de Pedido:* ${data.orderType === 'delivery' ? 'Entrega' : 'Retirada no Local'}\n`;
+    let orderTypeStr = 'Retirada no Local';
+    if (data.orderType === 'delivery') orderTypeStr = 'Entrega';
+    if (data.orderType === 'dine_in') orderTypeStr = 'Consumir no Local (Mesa)';
+    message += `*Tipo de Pedido:* ${orderTypeStr}\n`;
 
     if (data.orderType === 'delivery' && data.address) {
         message += `\n*Endereço de Entrega:*\n`;

@@ -32,7 +32,9 @@ export default function Home() {
   // Checkout State
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
-  const [orderType, setOrderType] = useState<'delivery' | 'pickup'>('delivery');
+  const [orderType, setOrderType] = useState<'delivery' | 'pickup' | 'dine_in'>('delivery');
+  const [tableNumber, setTableNumber] = useState("");
+  const [peopleCount, setPeopleCount] = useState(1);
   const [address, setAddress] = useState({
     street: "",
     number: "",
@@ -97,6 +99,11 @@ export default function Home() {
       return;
     }
 
+    if (orderType === 'dine_in' && (!tableNumber.trim() || peopleCount < 1)) {
+      alert("Por favor, preencha o número da mesa e a quantidade de pessoas.");
+      return;
+    }
+
     const finalTotal = getCartTotal() + (orderType === 'delivery' ? config.deliveryFee : 0);
 
     localStorage.setItem('moes_customer_data', JSON.stringify({
@@ -115,6 +122,8 @@ export default function Home() {
       customerName: customerName.trim(),
       customerPhone: customerPhone.trim(),
       address: orderType === 'delivery' ? address : undefined,
+      tableNumber: orderType === 'dine_in' ? tableNumber.trim() : undefined,
+      peopleCount: orderType === 'dine_in' ? peopleCount : undefined,
       paymentMethod
     };
 
@@ -292,7 +301,7 @@ export default function Home() {
                 {/* Order Type */}
                 <div>
                   <h3 className="font-bold text-zinc-800 mb-3">Como você prefere?</h3>
-                  <div className="flex p-1 bg-gray-100 rounded-xl">
+                  <div className="flex flex-col sm:flex-row p-1 bg-gray-100 rounded-xl gap-1">
                     <button
                       onClick={() => setOrderType('delivery')}
                       className={`flex-1 py-2 text-sm font-bold rounded-lg transition-colors ${orderType === 'delivery' ? 'bg-white text-orange-600 shadow-sm' : 'text-zinc-500 hover:text-zinc-700'}`}
@@ -304,6 +313,12 @@ export default function Home() {
                       className={`flex-1 py-2 text-sm font-bold rounded-lg transition-colors ${orderType === 'pickup' ? 'bg-white text-orange-600 shadow-sm' : 'text-zinc-500 hover:text-zinc-700'}`}
                     >
                       Retirar no Local
+                    </button>
+                    <button
+                      onClick={() => setOrderType('dine_in')}
+                      className={`flex-1 py-2 text-sm font-bold rounded-lg transition-colors ${orderType === 'dine_in' ? 'bg-white text-orange-600 shadow-sm' : 'text-zinc-500 hover:text-zinc-700'}`}
+                    >
+                      Consumir no Local (Mesa)
                     </button>
                   </div>
                 </div>
@@ -341,6 +356,27 @@ export default function Home() {
                       className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-zinc-800"
                       required
                     />
+                  </div>
+                )}
+
+                {/* Dine-in Table Info */}
+                {orderType === 'dine_in' && (
+                  <div className="space-y-3 animate-fade-in">
+                    <h3 className="font-bold text-zinc-800 mb-1">Dados da Mesa</h3>
+                    <div className="grid grid-cols-2 gap-3">
+                      <input
+                        type="text" placeholder="Número da Mesa"
+                        value={tableNumber} onChange={e => setTableNumber(e.target.value)}
+                        className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-zinc-800"
+                        required
+                      />
+                      <input
+                        type="number" placeholder="Qtd. Pessoas" min="1"
+                        value={peopleCount || 1} onChange={e => setPeopleCount(parseInt(e.target.value) || 1)}
+                        className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-zinc-800"
+                        required
+                      />
+                    </div>
                   </div>
                 )}
 
