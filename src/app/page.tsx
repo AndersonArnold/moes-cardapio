@@ -34,8 +34,6 @@ export default function Home() {
   const [customerPhone, setCustomerPhone] = useState("");
   const [orderType, setOrderType] = useState<'delivery' | 'pickup' | 'dine_in'>('delivery');
   const [tableNumber, setTableNumber] = useState("");
-  const [peopleCount, setPeopleCount] = useState<number | "">(1);
-  const [glassesCount, setGlassesCount] = useState<number | "">(0);
   const [address, setAddress] = useState({
     street: "",
     number: "",
@@ -43,6 +41,15 @@ export default function Home() {
     reference: ""
   });
   const [paymentMethod, setPaymentMethod] = useState("Dinheiro");
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const mesaParam = params.get('mesa');
+    if (mesaParam) {
+      setOrderType('dine_in');
+      setTableNumber(mesaParam);
+    }
+  }, []);
 
   useEffect(() => {
     if (isCartOpen) {
@@ -100,8 +107,8 @@ export default function Home() {
       return;
     }
 
-    if (orderType === 'dine_in' && (!tableNumber.trim() || !peopleCount || peopleCount < 1)) {
-      alert("Por favor, preencha o número da mesa e a quantidade de pessoas.");
+    if (orderType === 'dine_in' && !tableNumber.trim()) {
+      alert("Por favor, preencha o número da mesa.");
       return;
     }
 
@@ -124,8 +131,6 @@ export default function Home() {
       customerPhone: customerPhone.trim(),
       address: orderType === 'delivery' ? address : undefined,
       tableNumber: orderType === 'dine_in' ? tableNumber.trim() : undefined,
-      peopleCount: orderType === 'dine_in' ? (peopleCount === "" ? 1 : peopleCount) : undefined,
-      glassesCount: orderType === 'dine_in' ? (glassesCount === "" ? 0 : glassesCount) : undefined,
       paymentMethod
     };
 
@@ -365,22 +370,10 @@ export default function Home() {
                 {orderType === 'dine_in' && (
                   <div className="space-y-3 animate-fade-in">
                     <h3 className="font-bold text-zinc-800 mb-1">Dados da Mesa</h3>
-                    <div className="grid grid-cols-3 gap-3">
+                    <div>
                       <input
                         type="text" placeholder="Nº Mesa"
                         value={tableNumber} onChange={e => setTableNumber(e.target.value)}
-                        className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-zinc-800"
-                        required
-                      />
-                      <input
-                        type="number" placeholder="Pessoas" min="1"
-                        value={peopleCount === "" ? "" : peopleCount} onChange={e => setPeopleCount(e.target.value === "" ? "" : parseInt(e.target.value))}
-                        className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-zinc-800"
-                        required
-                      />
-                      <input
-                        type="number" placeholder="Copos" min="0"
-                        value={glassesCount === "" ? "" : glassesCount} onChange={e => setGlassesCount(e.target.value === "" ? "" : parseInt(e.target.value))}
                         className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-zinc-800"
                         required
                       />

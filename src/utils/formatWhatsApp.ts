@@ -16,8 +16,6 @@ interface OrderData {
         reference: string;
     };
     tableNumber?: string;
-    peopleCount?: number;
-    glassesCount?: number;
     paymentMethod: string;
 }
 
@@ -25,9 +23,7 @@ export const formatWhatsAppMessage = (data: OrderData): string => {
     let message = `🍔 *NOVO PEDIDO - ${data.storeName.toUpperCase()}*\n\n`;
 
     if (data.orderType === 'dine_in') {
-        message += `🚀 *** PEDIDO NA MESA ${data.tableNumber} *** 🚀\n`;
-        message += `*Quantidade de Pessoas:* ${data.peopleCount}\n`;
-        message += `*Número de Copos:* ${data.glassesCount || 0}\n\n`;
+        message += `📍 ====== MESA ${data.tableNumber} ====== 📍\n\n`;
     }
 
     if (data.customerName) {
