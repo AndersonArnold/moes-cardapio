@@ -681,5 +681,5 @@ export default function Home() {
         <p className="mt-2">Feito com ❤️</p>
       </footer>
     </div>
-   );
+    );
 };
