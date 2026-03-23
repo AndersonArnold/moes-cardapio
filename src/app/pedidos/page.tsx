@@ -5,8 +5,8 @@ import { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
 // ⚠️ COLE SUAS CHAVES AQUI (Pegue no Supabase > Settings > API)
-const SUPABASE_URL = 'SUA_URL_AQUI'; 
-const SUPABASE_KEY = 'SUA_CHAVE_ANON_AQUI';
+const SUPABASE_URL = 'https://edzcezjkshefeotgtxnt.supabase.co'; 
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkemNlemprc2hlZmVvdGd0eG50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0ODU0ODcsImV4cCI6MjA4ODA2MTQ4N30.jyX3e_JKaSkS3bEEn0IEjnGWIIa_1bdlH2UWFajBGlI';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
