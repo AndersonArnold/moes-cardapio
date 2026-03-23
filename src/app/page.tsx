@@ -1,11 +1,6 @@
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  'https://edczezjkshefeotgtxnt.supabase.co', 
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkemNlemprc2hlZmVvdGd0eG50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0ODU0ODcsImV4cCI6MjA4ODA2MTQ4N30.jyX3e_JKaSkS3bEEn0IEjnGWIIa_1bdlH2UWFajBGlI' 
-);
 "use client";
 
+import { createClient } from '@supabase/supabase-js';
 import { useState, useEffect } from "react";
 import { useCartStore } from "../store/useCartStore";
 import { formatWhatsAppMessage } from "../utils/formatWhatsApp";
@@ -13,7 +8,12 @@ import { useMenuStore } from "../store/useMenuStore";
 import { useStoreConfig } from "../store/useStoreConfig";
 import Image from "next/image";
 
-const WHATSAPP_NUMBER = "5511999999999"; // Fictional number
+const supabase = createClient(
+  'https://edczezjkshefeotgtxnt.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpcDMiOiJzdXBhYmFmZSIzInJlZiI6ImVkemVqayIsImVvdiI6MvVvdG00eG50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI0ODU2MzIzIiwibm9uY2UiOiI1ODU0ODU0ODcsImV4cCI6MjA1ODA0MDAyM30.jyX3e_JKaSks3bEEn0IEjnGWIIa_1bdlH2UWfajBG1I'
+);
+
+const WHATSAPP_NUMBER = "+55 49 9152-81744"; // Verifique se este é o seu número
 
 export default function Home() {
   const { items: cartItems, addItem, removeItem, updateItem, getCartTotal, getCartItemCount } = useCartStore();
