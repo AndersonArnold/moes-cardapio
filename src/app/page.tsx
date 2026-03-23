@@ -683,14 +683,14 @@ export default function Home() {
           <p>&copy; {new Date().getFullYear()} {config.storeName}. Todos os direitos reservados.</p>
           <p className="mt-2 md:mt-0">Feito com 🧡</p>
         </div>
-    </footer>
-      </div>
-    );
-  };
-
+    // Final do componente Home
   return (
-    <>
-      {renderContent()}
-    </>
+    <div className="min-h-screen bg-zinc-950 text-white">
+      {/* Aqui o site renderiza o conteúdo que já está lá em cima */}
+      <footer className="p-8 border-t border-zinc-800 text-center text-zinc-500">
+        <p>&copy; {new Date().getFullYear()} {config.storeName}. Todos os direitos reservados.</p>
+        <p className="mt-2">Feito com ❤️</p>
+      </footer>
+    </div>
   );
 }
