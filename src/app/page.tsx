@@ -209,7 +209,7 @@ export default function Home() {
                     onClick={() => setItemQuantity(Math.max(1, itemQuantity - 1))}
                     className="w-8 h-8 flex items-center justify-center bg-white rounded-full text-zinc-600 hover:text-orange-600 shadow-sm"
                   >-</button>
-                  <span className="font-bold text-lg w-4 text-center">{itemQuantity}</span>
+                  <span className="font-bold text-lg w-4 text-center text-black">{itemQuantity}</span>
                   <button
                     onClick={() => setItemQuantity(itemQuantity + 1)}
                     className="w-8 h-8 flex items-center justify-center bg-white rounded-full text-zinc-600 hover:text-orange-600 shadow-sm"
@@ -275,7 +275,7 @@ export default function Home() {
                             onClick={() => setCartEditQuantity(Math.max(1, cartEditQuantity - 1))}
                             className="w-7 h-7 flex items-center justify-center bg-white rounded-full text-zinc-600 hover:text-orange-600 shadow-sm font-bold"
                           >-</button>
-                          <span className="font-bold text-sm w-4 text-center">{cartEditQuantity}</span>
+                          <span className="font-bold text-sm w-4 text-center text-black">{cartEditQuantity}</span>
                           <button
                             onClick={() => setCartEditQuantity(cartEditQuantity + 1)}
                             className="w-7 h-7 flex items-center justify-center bg-white rounded-full text-zinc-600 hover:text-orange-600 shadow-sm font-bold"
