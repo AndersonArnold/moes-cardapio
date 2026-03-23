@@ -1,3 +1,9 @@
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  'https://edczezjkshefeotgtxnt.supabase.co', 
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkemNlemprc2hlZmVvdGd0eG50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0ODU0ODcsImV4cCI6MjA4ODA2MTQ4N30.jyX3e_JKaSkS3bEEn0IEjnGWIIa_1bdlH2UWFajBGlI' 
+);
 "use client";
 
 import { useState, useEffect } from "react";
@@ -138,10 +144,28 @@ export default function Home() {
       tableNumber: orderType === 'dine_in' ? tableNumber.trim() : undefined,
       paymentMethod
     };
-
+// 1. Prepara a mensagem
     const encodedMessage = formatWhatsAppMessage(messageData);
+
+    // 2. 🔥 NOVO: Grava no banco de dados do Moe's antes de ir pro WhatsApp
+    try {
+      await supabase
+        .from('pedidos_impressao')
+        .insert([
+          { 
+            cliente: customerName, 
+            conteudo: decodeURIComponent(encodedMessage), 
+            impresso: false 
+          }
+        ]);
+      console.log("Pedido salvo com sucesso!");
+    } catch (err) {
+      console.error("Erro ao salvar no Supabase:", err);
+    }
+
+    // 3. Abre o WhatsApp normalmente
     window.open(`https://wa.me/${config.whatsappNumber}?text=${encodedMessage}`, '_blank');
-  };
+ 
 
   const cartTotal = getCartTotal();
   const cartItemCount = getCartItemCount();
