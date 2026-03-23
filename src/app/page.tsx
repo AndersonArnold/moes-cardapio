@@ -683,10 +683,14 @@ export default function Home() {
           <p>&copy; {new Date().getFullYear()} {config.storeName}. Todos os direitos reservados.</p>
           <p className="mt-2 md:mt-0">Feito com 🧡</p>
         </div>
-       </footer>
+    </footer>
       </div>
     );
   };
 
-  return renderContent();
+  return (
+    <>
+      {renderContent()}
+    </>
+  );
 }
