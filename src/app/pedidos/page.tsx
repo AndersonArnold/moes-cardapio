@@ -4,101 +4,62 @@ export const runtime = 'edge';
 import { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
-// ⚠️ COLE SUAS CHAVES AQUI (Pegue no Supabase > Settings > API)
+// Mantenha suas chaves aqui (como você já fez no print anterior)
 const SUPABASE_URL = 'https://edzcezjkshefeotgtxnt.supabase.co'; 
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkemNlemprc2hlZmVvdGd0eG50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0ODU0ODcsImV4cCI6MjA4ODA2MTQ4N30.jyX3e_JKaSkS3bEEn0IEjnGWIIa_1bdlH2UWFajBGlI';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkemNlemprc2hlZmVvdGd0eG50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0ODU0ODcsImV4cCI6MjA4ODA2MTQ4N30.jyX3e_JKaSkS3bEEn0IEjnGWIIa_1bdlH2UWFajBGlI'; // Coloque sua chave anon aqui
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 export default function PedidosPage() {
   const [pedidos, setPedidos] = useState<any[]>([]);
+  const [status, setStatus] = useState('Iniciando...');
+  const [erro, setErro] = useState<string | null>(null);
 
-  // Função que dispara a impressão para o App RawBT no celular
-  const imprimirNoCelular = (pedido: any) => {
-    // Usamos a coluna 'conteudo' que vimos no seu print do banco
-    const textoParaImprimir = pedido.conteudo || "Pedido sem conteúdo registrado.";
-    
-    // Adiciona espaços no final para a BT-583 não cortar o texto
-    const cupomFinal = `${textoParaImprimir}\n\n\n\n`;
-
+  const buscarDados = async () => {
+    setStatus('Buscando dados...');
+    setErro(null);
     try {
-      // Converte para Base64 e chama o protocolo do RawBT
-      const base64Cupom = btoa(unescape(encodeURIComponent(cupomFinal)));
-      window.location.href = `rawbt:base64,${base64Cupom}`;
-    } catch (e) {
-      console.error("Erro ao processar impressão:", e);
-    }
-  };
-
-  useEffect(() => {
-    // 1. Carrega os pedidos que já estão na tabela 'pedidos_impressao'
-    const carregarIniciais = async () => {
       const { data, error } = await supabase
         .from('pedidos_impressao')
         .select('*')
         .order('created_at', { ascending: false })
-        .limit(10);
-      
-      if (data) setPedidos(data);
-      if (error) console.error("Erro ao buscar dados:", error.message);
-    };
-    carregarIniciais();
+        .limit(5);
 
-    // 2. ESCUTA EM TEMPO REAL (O pedido pula na tela e imprime sozinho)
-    const canal = supabase
-      .channel('moes-realtime-final')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'pedidos_impressao' },
-        (payload) => {
-          const novoPedido = payload.new;
-          setPedidos((prev) => [novoPedido, ...prev]);
-          
-          // DISPARA A IMPRESSORA AUTOMATICAMENTE
-          imprimirNoCelular(novoPedido);
-        }
-      )
-      .subscribe((status) => {
-        console.log("Status da conexão Moe's:", status);
-      });
+      if (error) {
+        setErro(`Erro do Supabase: ${error.message}`);
+        setStatus('Erro na busca');
+      } else if (data) {
+        setPedidos(data);
+        setStatus(data.length > 0 ? 'Conectado e com dados!' : 'Conectado, mas tabela vazia');
+      }
+    } catch (e: any) {
+      setErro(`Erro de Conexão: ${e.message}`);
+    }
+  };
 
-    return () => { supabase.removeChannel(canal); };
+  useEffect(() => {
+    buscarDados();
   }, []);
 
   return (
-    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif', backgroundColor: '#f0f2f5', minHeight: '100vh' }}>
-      <header style={{ textAlign: 'center', marginBottom: '20px' }}>
-        <h1 style={{ color: '#d32f2f', margin: '0' }}>🔥 Painel de Pedidos Moe's 🔥</h1>
-        <p style={{ fontSize: '14px', color: '#666' }}>Mondaí, SC - Impressão Automática BT-583</p>
-      </header>
+    <div style={{ padding: '20px', fontFamily: 'sans-serif', textAlign: 'center' }}>
+      <h1 style={{ color: '#d32f2f' }}>Moe's - Diagnóstico 🔎</h1>
+      
+      <div style={{ backgroundColor: '#fff', padding: '15px', borderRadius: '10px', border: '1px solid #ddd', marginBottom: '20px' }}>
+        <p><strong>Status:</strong> {status}</p>
+        {erro && <p style={{ color: 'red', fontWeight: 'bold' }}>❌ {erro}</p>}
+        <button onClick={buscarDados} style={{ padding: '10px', backgroundColor: '#333', color: '#fff', border: 'none', borderRadius: '5px' }}>
+          🔄 Tentar Novamente
+        </button>
+      </div>
 
-      <div style={{ maxWidth: '500px', margin: '0 auto' }}>
-        {pedidos.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '40px', backgroundColor: '#fff', borderRadius: '10px' }}>
-            <p>Aguardando pedidos no banco... 🍟</p>
-            <small style={{ color: '#999' }}>Verifique se a tabela 'pedidos_impressao' tem dados.</small>
+      <div style={{ textAlign: 'left' }}>
+        {pedidos.map((p) => (
+          <div key={p.id} style={{ borderBottom: '1px solid #ccc', padding: '10px' }}>
+            <p><strong>Pedido de:</strong> {p.cliente}</p>
+            <pre style={{ fontSize: '10px' }}>{p.conteudo}</pre>
           </div>
-        ) : (
-          pedidos.map((p) => (
-            <div key={p.id} style={{ backgroundColor: '#fff', padding: '15px', borderRadius: '10px', marginBottom: '15px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', borderLeft: '5px solid #4CAF50' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                <span style={{ fontWeight: 'bold' }}>Cliente: {p.cliente || 'Anderson'}</span>
-                <span style={{ fontSize: '12px', color: '#999' }}>{new Date(p.created_at).toLocaleTimeString()}</span>
-              </div>
-              
-              <div style={{ backgroundColor: '#f9f9f9', padding: '10px', borderRadius: '5px', fontSize: '13px', whiteSpace: 'pre-wrap', marginBottom: '15px' }}>
-                {p.conteudo}
-              </div>
-
-              <button 
-                onClick={() => imprimirNoCelular(p)}
-                style={{ width: '100%', backgroundColor: '#4CAF50', color: 'white', border: 'none', padding: '12px', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold', fontSize: '16px' }}
-              >
-                🖨️ Re-imprimir Cupom
-              </button>
-            </div>
-          ))
-        )}
+        ))}
       </div>
     </div>
   );
