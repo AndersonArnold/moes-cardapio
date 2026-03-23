@@ -4,7 +4,6 @@ export const runtime = 'edge';
 import { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
-// Conexão com o seu banco de dados Supabase
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -13,44 +12,38 @@ const supabase = createClient(
 export default function PedidosPage() {
   const [pedidos, setPedidos] = useState<any[]>([]);
 
-  // Função que envia o comando para o App RawBT no celular
   const imprimirNoCelular = (pedido: any) => {
     const dataHora = new Date().toLocaleString('pt-BR');
     
-    // Montagem do Cupom do Moe's (Formatado para 58mm)
+    // Cupom formatado para a BT-583 do Moe's
     const cupom = `
       MOE'S LANCHERIA 🍔🍟
       --------------------------------
       PEDIDO: #${pedido.id.toString().slice(-4)}
       DATA: ${dataHora}
       --------------------------------
-      CLIENTE: ${pedido.cliente_nome || 'Consumidor'}
+      CLIENTE: ${pedido.cliente_name || 'Consumidor'}
       
-      ITENS:
-      ${pedido.itens_resumo || 'Nenhum item informado'}
+      RESUMO:
+      ${pedido.itens_resumo || 'Itens no sistema'}
       
       --------------------------------
-      TOTAL: R$ ${pedido.valor_total}
+      TOTAL: R$ ${pedido.total_price || pedido.valor_total || '0,00'}
       --------------------------------
-      
-      OBRIGADO PELA PREFERENCIA!
-      COMA NO MOE'S! 🍩
+      OBRIGADO! COMA NO MOE'S! 🍩
       
       
     `;
 
-    // Converte o texto para Base64 para o RawBT entender
     const base64Cupom = btoa(unescape(encodeURIComponent(cupom)));
-    
-    // Dispara o comando para o app de impressão no Android
     window.location.href = `rawbt:base64,${base64Cupom}`;
   };
 
   useEffect(() => {
-    // 1. Busca inicial de pedidos
+    // Busca inicial na tabela CORRETA: pedidos_impressao
     const buscarPedidos = async () => {
       const { data } = await supabase
-        .from('pedidos')
+        .from('pedidos_impressao')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(10);
@@ -58,14 +51,16 @@ export default function PedidosPage() {
     };
     buscarPedidos();
 
-    // 2. ESCUTA EM TEMPO REAL (Ouvindo o Supabase)
+    // Escuta em tempo real na tabela CORRETA
     const channel = supabase
-      .channel('pedidos-reais')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'pedidos' }, (payload) => {
+      .channel('custom-insert-channel')
+      .on('postgres_changes', { 
+        event: 'INSERT', 
+        schema: 'public', 
+        table: 'pedidos_impressao' // Nome ajustado aqui também!
+      }, (payload) => {
         const novoPedido = payload.new;
         setPedidos((prev) => [novoPedido, ...prev]);
-        
-        // AUTO-PRINT: Chama a função de impressão assim que o pedido entra
         imprimirNoCelular(novoPedido);
       })
       .subscribe();
@@ -75,27 +70,19 @@ export default function PedidosPage() {
 
   return (
     <div style={{ padding: '20px', fontFamily: 'sans-serif', backgroundColor: '#f0f2f5', minHeight: '100vh' }}>
-      <h1 style={{ color: '#d32f2f', textAlign: 'center' }}>🔥 Painel de Pedidos Moe's 🔥</h1>
-      <p style={{ textAlign: 'center', fontSize: '12px' }}>Modo de Impressão: Celular (RawBT)</p>
+      <h1 style={{ color: '#d32f2f', textAlign: 'center' }}>🔥 Painel Moe's (Realtime) 🔥</h1>
       <hr />
-
       <div style={{ display: 'grid', gap: '15px' }}>
         {pedidos.length === 0 ? (
-          <p style={{ textAlign: 'center' }}>Aguardando novos pedidos...</p>
+          <p style={{ textAlign: 'center' }}>Nenhum pedido na tabela 'pedidos_impressao'...</p>
         ) : (
           pedidos.map((p) => (
-            <div key={p.id} style={{ border: '1px solid #ddd', padding: '15px', borderRadius: '10px', backgroundColor: '#fff', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <h3 style={{ margin: '0' }}>#{p.id.toString().slice(-4)}</h3>
-                <button 
-                  onClick={() => imprimirNoCelular(p)}
-                  style={{ backgroundColor: '#4CAF50', color: 'white', border: 'none', padding: '5px 10px', borderRadius: '5px', cursor: 'pointer' }}
-                >
-                  🖨️ Re-imprimir
-                </button>
-              </div>
-              <p><strong>Cliente:</strong> {p.cliente_nome}</p>
-              <p><strong>Total:</strong> R$ {p.valor_total}</p>
+            <div key={p.id} style={{ border: '1px solid #ddd', padding: '15px', borderRadius: '10px', backgroundColor: '#fff' }}>
+              <h3>Pedido #{p.id.toString().slice(-4)}</h3>
+              <p><strong>Cliente:</strong> {p.cliente_name}</p>
+              <button onClick={() => imprimirNoCelular(p)} style={{ backgroundColor: '#4CAF50', color: 'white', padding: '10px', borderRadius: '5px', border: 'none' }}>
+                🖨️ Imprimir agora
+              </button>
             </div>
           ))
         )}
