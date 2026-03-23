@@ -97,7 +97,7 @@ export default function Home() {
     }
   };
 
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
     if (!config.actualIsOpen) {
       alert("Desculpe, a loja está fechada no momento.");
       return;
