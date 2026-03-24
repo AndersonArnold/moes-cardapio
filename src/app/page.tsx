@@ -16,8 +16,8 @@ const menuItems = [
 
 export default function Home() {
   const [cart, setCart] = useState<any[]>([]);
-  const [isOrderFinished, setIsOrderFinished] = useState(false);
-  const [customerData, setCustomerData] = useState({ name: '' });
+  const [orderType, setOrderType] = useState('local');
+  const [customerData, setCustomerData] = useState({ name: '', table: '', payment: 'Pix' });
 
   const total = cart.reduce((acc: any, item: any) => acc + item.price, 0);
 
@@ -27,74 +27,100 @@ export default function Home() {
       customer_name: customerData.name,
       items: cart,
       total_price: total,
+      type: orderType,
+      table_number: customerData.table,
       status: 'Pendente'
     }]);
-    if (!error) { 
-        setIsOrderFinished(true); 
-        setCart([]);
-        const message = `🍟 *Novo Pedido - Moe's*%0A👤 Cliente: ${customerData.name}%0A💰 Total: R$ ${total.toFixed(2)}`;
-        window.open(`https://wa.me/5549991345620?text=${message}`);
-    }
+    if (!error) { alert("Pedido enviado com sucesso!"); setCart([]); }
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white p-4 font-sans text-center">
-      <header className="max-w-md mx-auto py-10">
-        <h1 className="text-4xl font-black text-orange-500 italic uppercase tracking-tighter">Moe's Lancheria</h1>
-        <p className="text-zinc-500 text-sm mt-2 font-medium tracking-widest">MONDAÍ • SC</p>
-      </header>
+    <div className="min-h-screen bg-black text-white p-4 font-sans">
+      <div className="max-w-md mx-auto">
+        <header className="text-center py-8">
+          <h1 className="text-4xl font-black text-orange-500 italic">MOE'S</h1>
+          <p className="text-zinc-500 text-sm tracking-widest">LANCHERIA • MONDAÍ</p>
+        </header>
 
-      <main className="max-w-md mx-auto space-y-4 pb-32 text-left">
-        {menuItems.map((item) => (
-          <div key={item.id} className="bg-zinc-900 border border-zinc-800 p-5 rounded-3xl flex justify-between items-center shadow-xl">
-            <div className="flex-1 pr-4">
-              <h3 className="font-bold text-lg text-zinc-100">{item.name}</h3>
-              <p className="text-zinc-500 text-xs mt-1 leading-relaxed">{item.description}</p>
-              <p className="text-orange-500 font-black mt-3 text-lg italic">R$ {item.price.toFixed(2)}</p>
-            </div>
-            <button 
-                onClick={() => setCart([...cart, item])} 
-                className="bg-orange-600 hover:bg-orange-500 w-12 h-12 rounded-2xl font-bold text-2xl shadow-lg active:scale-90 transition-all text-white"
-            >
+        <div className="space-y-4">
+          {menuItems.map((item) => (
+            <div key={item.id} className="bg-zinc-900 border border-zinc-800 p-4 rounded-2xl flex justify-between items-center shadow-lg">
+              <div className="flex-1">
+                <h3 className="font-bold text-lg leading-tight">{item.name}</h3>
+                <p className="text-zinc-500 text-xs mt-1">{item.description}</p>
+                <p className="text-orange-500 font-bold mt-2">R$ {item.price.toFixed(2)}</p>
+              </div>
+              <button 
+                onClick={() => setCart([...cart, item])}
+                className="ml-4 bg-orange-600 w-12 h-12 rounded-xl text-2xl font-bold active:scale-90 transition-all shadow-lg shadow-orange-900/20"
+              >
                 +
-            </button>
-          </div>
-        ))}
-      </main>
-
-      {cart.length > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 bg-zinc-900/95 backdrop-blur-md border-t border-zinc-800 p-6 z-40">
-          <div className="max-w-md mx-auto">
-            <div className="flex justify-between items-end mb-4 px-1">
-                <span className="text-zinc-400 font-bold uppercase text-xs tracking-widest italic">🛒 {cart.length} itens</span>
-                <span className="text-3xl font-black text-orange-500 italic">R$ {total.toFixed(2)}</span>
+              </button>
             </div>
-            <input 
+          ))}
+        </div>
+
+        {cart.length > 0 && (
+          <div className="mt-8 bg-zinc-900 border-2 border-orange-500 p-6 rounded-3xl shadow-2xl">
+            <h2 className="text-xl font-bold mb-4 flex justify-between">
+              <span>Seu Carrinho</span>
+              <span className="text-orange-500">{cart.length}</span>
+            </h2>
+            
+            <div className="space-y-2 mb-4 max-h-40 overflow-y-auto">
+              {cart.map((i, idx) => (
+                <div key={idx} className="flex justify-between text-sm text-zinc-400">
+                  <span>{i.name}</span>
+                  <span>R$ {i.price.toFixed(2)}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="border-t border-zinc-800 pt-4 mb-6">
+              <div className="flex justify-between text-2xl font-black">
+                <span>TOTAL</span>
+                <span className="text-orange-500">R$ {total.toFixed(2)}</span>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-2">
+                <button onClick={() => setOrderType('local')} className={`p-3 rounded-xl font-bold ${orderType === 'local' ? 'bg-orange-600' : 'bg-zinc-800 text-zinc-500'}`}>MESA</button>
+                <button onClick={() => setOrderType('delivery')} className={`p-3 rounded-xl font-bold ${orderType === 'delivery' ? 'bg-orange-600' : 'bg-zinc-800 text-zinc-500'}`}>RETIRADA</button>
+              </div>
+
+              <input 
                 type="text" 
                 placeholder="Seu Nome" 
-                className="w-full bg-zinc-800 p-4 rounded-2xl mb-4 border border-zinc-700 outline-none focus:ring-2 ring-orange-500 text-white"
+                className="w-full bg-zinc-800 p-4 rounded-xl outline-none focus:ring-2 ring-orange-500"
                 onChange={(e) => setCustomerData({...customerData, name: e.target.value})}
-            />
-            <button 
-                onClick={finishOrder}
-                className="w-full bg-orange-600 p-5 rounded-2xl font-black text-xl shadow-xl active:scale-95 transition-all uppercase italic text-white"
-            >
-                Enviar Pedido 🚀
-            </button>
-          </div>
-        </div>
-      )}
+              />
 
-      {isOrderFinished && (
-        <div className="fixed inset-0 bg-black/95 flex items-center justify-center p-6 z-50">
-          <div className="bg-zinc-900 p-10 rounded-[40px] border border-orange-500 text-center shadow-2xl">
-            <div className="text-6xl mb-6">✅</div>
-            <h2 className="text-3xl font-black mb-2 uppercase italic text-orange-500">Sucesso!</h2>
-            <p className="text-zinc-400 mb-8 font-medium">Seu pedido foi enviado para o Moe's!</p>
-            <button onClick={() => setIsOrderFinished(false)} className="bg-zinc-800 px-10 py-3 rounded-2xl font-bold uppercase tracking-widest text-sm text-white border border-zinc-700">Fechar</button>
+              {orderType === 'local' ? (
+                <input 
+                  type="text" 
+                  placeholder="Número da Mesa" 
+                  className="w-full bg-zinc-800 p-4 rounded-xl outline-none focus:ring-2 ring-orange-500"
+                  onChange={(e) => setCustomerData({...customerData, table: e.target.value})}
+                />
+              ) : (
+                <select className="w-full bg-zinc-800 p-4 rounded-xl outline-none" onChange={(e) => setCustomerData({...customerData, payment: e.target.value})}>
+                  <option>Pix</option>
+                  <option>Cartão</option>
+                  <option>Dinheiro</option>
+                </select>
+              )}
+
+              <button 
+                onClick={finishOrder}
+                className="w-full bg-orange-600 p-5 rounded-2xl font-black text-xl shadow-xl active:scale-95 transition-all"
+              >
+                FINALIZAR PEDIDO
+              </button>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
