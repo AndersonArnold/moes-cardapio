@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
 // Configuração do Supabase
@@ -25,16 +25,16 @@ const menuItems = [
 ];
 
 export default function Home() {
-  const [cart, setCart] = useState([]);
+  const [cart, setCart] = useState<any[]>([]);
   const [isOrderFinished, setIsOrderFinished] = useState(false);
   const [orderType, setOrderType] = useState('local');
   const [customerData, setCustomerData] = useState({ name: '', table: '', payment: 'Caixa' });
 
-  const addToCart = (item) => {
+  const addToCart = (item: any) => {
     setCart([...cart, item]);
   };
 
-  const total = cart.reduce((acc, item) => acc + item.price, 0);
+  const total = cart.reduce((acc: any, item: any) => acc + item.price, 0);
 
   const finishOrder = async () => {
     const orderData = {
@@ -52,7 +52,7 @@ export default function Home() {
     
     if (!error) {
       setIsOrderFinished(true);
-      const message = `🍟 *Novo Pedido - Moe's*%0A👤 Cliente: ${customerData.name}${orderType === 'local' ? `%0A🏠 Mesa: ${customerData.table}` : ''}%0A🍔 Itens: ${cart.map(i => i.name).join(', ')}%0A💰 Total: R$ ${total.toFixed(2)}`;
+      const message = `🍟 *Novo Pedido - Moe's*%0A👤 Cliente: ${customerData.name}${orderType === 'local' ? `%0A🏠 Mesa: ${customerData.table}` : ''}%0A🍔 Itens: ${cart.map((i: any) => i.name).join(', ')}%0A💰 Total: R$ ${total.toFixed(2)}`;
       window.open(`https://wa.me/${config.whatsappNumber}?text=${message}`);
     }
   };
@@ -64,56 +64,58 @@ export default function Home() {
           <h1 className="text-3xl font-bold text-orange-500">{config.storeName}</h1>
           <p className="text-zinc-400 mt-1">{config.operatingDays} • {config.openingTime} às {config.closingTime}</p>
         </div>
-        <div className="bg-zinc-900 p-3 rounded-2xl border border-zinc-800 text-orange-500 font-bold">
+        <div className="bg-zinc-900 p-3 rounded-2xl border border-zinc-800 text-orange-500 font-bold text-center min-w-[60px]">
           🛒 {cart.length}
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <main className="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8 pb-20">
         <div className="lg:col-span-2 space-y-6">
-          <h2 className="text-xl font-semibold mb-4 text-orange-500">Cardápio Digital</h2>
-          {menuItems.map((item) => (
-            <div key={item.id} className="bg-zinc-900/50 border border-zinc-800 p-4 rounded-2xl flex justify-between items-center">
+          <h2 className="text-xl font-semibold mb-4 text-orange-500">🍔 Cardápio Digital</h2>
+          {menuItems.map((item: any) => (
+            <div key={item.id} className="bg-zinc-900/50 border border-zinc-800 p-4 rounded-2xl flex justify-between items-center group hover:border-orange-500/50 transition-all">
               <div>
                 <h3 className="font-bold text-lg">{item.name}</h3>
                 <p className="text-zinc-400 text-sm">{item.description}</p>
                 <p className="text-orange-500 font-bold mt-2">R$ {item.price.toFixed(2)}</p>
               </div>
-              <button onClick={() => addToCart(item)} className="bg-orange-600 p-3 rounded-xl font-bold">+</button>
+              <button onClick={() => addToCart(item)} className="bg-orange-600 hover:bg-orange-500 px-5 py-3 rounded-xl font-bold shadow-lg shadow-orange-900/20">+</button>
             </div>
           ))}
         </div>
 
-        <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-3xl h-fit">
-          <h2 className="text-xl font-bold mb-6">🛒 Seu Pedido</h2>
-          {cart.length === 0 ? <p className="text-zinc-500 italic">Vazio...</p> : (
+        <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-3xl h-fit sticky top-4">
+          <h2 className="text-xl font-bold mb-6">📝 Seu Pedido</h2>
+          {cart.length === 0 ? <p className="text-zinc-500 italic text-center py-4">O carrinho está vazio...</p> : (
             <div className="space-y-6">
-              {cart.map((item, index) => (
-                <div key={index} className="flex justify-between text-sm border-b border-zinc-800 pb-2">
-                  <span>{item.name}</span>
-                  <span className="text-orange-400">R$ {item.price.toFixed(2)}</span>
-                </div>
-              ))}
-              <div className="text-xl font-bold pt-4 flex justify-between">
-                <span>Total</span>
-                <span>R$ {total.toFixed(2)}</span>
+              <div className="max-h-[300px] overflow-y-auto pr-2 space-y-3">
+                {cart.map((item: any, index: number) => (
+                  <div key={index} className="flex justify-between text-sm border-b border-zinc-800 pb-2">
+                    <span className="text-zinc-300">{item.name}</span>
+                    <span className="text-orange-400 font-medium">R$ {item.price.toFixed(2)}</span>
+                  </div>
+                ))}
               </div>
-              <div className="space-y-4 pt-4 border-t border-zinc-800">
+              <div className="text-xl font-bold pt-4 flex justify-between border-t border-zinc-800">
+                <span>Total</span>
+                <span className="text-orange-500">R$ {total.toFixed(2)}</span>
+              </div>
+              <div className="space-y-4 pt-4">
                 <div className="flex gap-2">
-                  <button onClick={() => setOrderType('local')} className={`flex-1 p-3 rounded-xl text-sm font-bold ${orderType === 'local' ? 'bg-orange-600' : 'bg-zinc-800'}`}>Mesa</button>
-                  <button onClick={() => setOrderType('delivery')} className={`flex-1 p-3 rounded-xl text-sm font-bold ${orderType === 'delivery' ? 'bg-orange-600' : 'bg-zinc-800'}`}>Retirada</button>
+                  <button onClick={() => setOrderType('local')} className={`flex-1 p-3 rounded-xl text-sm font-bold transition-all ${orderType === 'local' ? 'bg-orange-600 text-white' : 'bg-zinc-800 text-zinc-400'}`}>Mesa</button>
+                  <button onClick={() => setOrderType('delivery')} className={`flex-1 p-3 rounded-xl text-sm font-bold transition-all ${orderType === 'delivery' ? 'bg-orange-600 text-white' : 'bg-zinc-800 text-zinc-400'}`}>Retirada</button>
                 </div>
-                <input type="text" placeholder="Seu Nome" className="w-full bg-zinc-800 p-3 rounded-xl" onChange={(e) => setCustomerData({...customerData, name: e.target.value})} />
+                <input type="text" placeholder="Seu Nome" className="w-full bg-zinc-800 p-3 rounded-xl border border-zinc-700 outline-none focus:border-orange-500" onChange={(e) => setCustomerData({...customerData, name: e.target.value})} />
                 {orderType === 'local' ? (
-                  <input type="text" placeholder="Número da Mesa" className="w-full bg-zinc-800 p-3 rounded-xl" onChange={(e) => setCustomerData({...customerData, table: e.target.value})} />
+                  <input type="text" placeholder="Número da Mesa" className="w-full bg-zinc-800 p-3 rounded-xl border border-zinc-700 outline-none focus:border-orange-500" onChange={(e) => setCustomerData({...customerData, table: e.target.value})} />
                 ) : (
-                  <select className="w-full bg-zinc-800 p-3 rounded-xl" onChange={(e) => setCustomerData({...customerData, payment: e.target.value})}>
+                  <select className="w-full bg-zinc-800 p-3 rounded-xl border border-zinc-700 outline-none focus:border-orange-500" onChange={(e) => setCustomerData({...customerData, payment: e.target.value})}>
                     <option value="Pix">Pix</option>
                     <option value="Cartão">Cartão</option>
                     <option value="Dinheiro">Dinheiro</option>
                   </select>
                 )}
-                <button onClick={finishOrder} className="w-full bg-orange-600 p-4 rounded-2xl font-bold shadow-xl">Finalizar Pedido</button>
+                <button onClick={finishOrder} className="w-full bg-orange-600 hover:bg-orange-500 p-4 rounded-2xl font-bold shadow-xl shadow-orange-900/40 transition-all active:scale-95">Finalizar Pedido</button>
               </div>
             </div>
           )}
@@ -121,11 +123,11 @@ export default function Home() {
       </main>
 
       {isOrderFinished && (
-        <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50">
-          <div className="bg-zinc-900 p-8 rounded-3xl border border-orange-500 text-center max-w-sm">
-            <h2 className="text-2xl font-bold mb-2">Pedido Enviado!</h2>
-            <p className="text-zinc-400 mb-6">Sucesso em Mondaí!</p>
-            <button onClick={() => { setIsOrderFinished(false); setCart([]); }} className="bg-zinc-800 px-6 py-2 rounded-xl">Fechar</button>
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+          <div className="bg-zinc-900 p-8 rounded-3xl border border-orange-500 text-center max-w-sm shadow-2xl">
+            <h2 className="text-2xl font-bold mb-2 text-white">Pedido Enviado! ✅</h2>
+            <p className="text-zinc-400 mb-6 text-sm">Sucesso! Agora é só aguardar que seu lanche está chegando.</p>
+            <button onClick={() => { setIsOrderFinished(false); setCart([]); }} className="bg-orange-600 px-8 py-3 rounded-xl font-bold">Fechar</button>
           </div>
         </div>
       )}
