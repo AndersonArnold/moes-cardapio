@@ -16,9 +16,8 @@ const menuItems = [
 
 export default function Home() {
   const [cart, setCart] = useState<any[]>([]);
-  const [orderType, setOrderType] = useState('local');
   const [isOrderFinished, setIsOrderFinished] = useState(false);
-  const [customerData, setCustomerData] = useState({ name: '', table: '', payment: 'Pix' });
+  const [customerData, setCustomerData] = useState({ name: '' });
 
   const total = cart.reduce((acc: any, item: any) => acc + item.price, 0);
 
@@ -28,86 +27,71 @@ export default function Home() {
       customer_name: customerData.name,
       items: cart,
       total_price: total,
-      type: orderType,
-      table_number: customerData.table,
       status: 'Pendente'
     }]);
-    if (!error) { setIsOrderFinished(true); setCart([]); }
+    if (!error) { 
+        setIsOrderFinished(true); 
+        setCart([]);
+        const message = `🍟 *Novo Pedido - Moe's*%0A👤 Cliente: ${customerData.name}%0A💰 Total: R$ ${total.toFixed(2)}`;
+        window.open(`https://wa.me/5549991345620?text=${message}`);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white p-4 font-sans">
-      <header className="max-w-4xl mx-auto flex justify-between items-center mb-10 py-6 border-b border-zinc-800">
-        <div>
-          <h1 className="text-3xl font-bold text-orange-500">Moe's Lancheria</h1>
-          <p className="text-zinc-400 flex items-center gap-2 text-sm">🕒 Terça a Domingo • 18:30 às 23:30</p>
-        </div>
-        <div className="relative bg-zinc-900 p-3 rounded-2xl border border-zinc-800 text-2xl">
-          🛒
-          {cart.length > 0 && <span className="absolute -top-2 -right-2 bg-orange-600 px-2 py-0.5 rounded-full text-xs font-bold animate-bounce">{cart.length}</span>}
-        </div>
+    <div className="min-h-screen bg-zinc-950 text-white p-4 font-sans text-center">
+      <header className="max-w-md mx-auto py-10">
+        <h1 className="text-4xl font-black text-orange-500 italic uppercase tracking-tighter">Moe's Lancheria</h1>
+        <p className="text-zinc-500 text-sm mt-2 font-medium tracking-widest">MONDAÍ • SC</p>
       </header>
 
-      <main className="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-6">
-          <h2 className="text-xl font-semibold flex items-center gap-2 mb-4 text-orange-500">🍴 Cardápio Digital</h2>
-          {menuItems.map((item) => (
-            <div key={item.id} className="bg-zinc-900/50 border border-zinc-800 p-4 rounded-2xl flex justify-between items-center hover:border-orange-500/50 transition-all shadow-lg">
-              <div>
-                <h3 className="font-bold text-lg">{item.name}</h3>
-                <p className="text-zinc-400 text-sm mt-1">{item.description}</p>
-                <p className="text-orange-500 font-bold mt-2 font-mono text-lg">R$ {item.price.toFixed(2)}</p>
-              </div>
-              <button onClick={() => setCart([...cart, item])} className="bg-orange-600 hover:bg-orange-500 p-4 rounded-xl font-bold shadow-lg shadow-orange-900/20 active:scale-90 transition-all">➕</button>
+      <main className="max-w-md mx-auto space-y-4 pb-32 text-left">
+        {menuItems.map((item) => (
+          <div key={item.id} className="bg-zinc-900 border border-zinc-800 p-5 rounded-3xl flex justify-between items-center shadow-xl">
+            <div className="flex-1 pr-4">
+              <h3 className="font-bold text-lg text-zinc-100">{item.name}</h3>
+              <p className="text-zinc-500 text-xs mt-1 leading-relaxed">{item.description}</p>
+              <p className="text-orange-500 font-black mt-3 text-lg italic">R$ {item.price.toFixed(2)}</p>
             </div>
-          ))}
-        </div>
-
-        <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-3xl h-fit sticky top-4">
-          <h2 className="text-xl font-bold mb-6">📝 Seu Pedido</h2>
-          {cart.length === 0 ? <p className="text-zinc-500 italic text-center py-4">Carrinho vazio...</p> : (
-            <div className="space-y-6">
-              <div className="space-y-3">
-                {cart.map((i, idx) => (
-                  <div key={idx} className="flex justify-between text-sm border-b border-zinc-800 pb-2">
-                    <span className="text-zinc-300">{i.name}</span>
-                    <span className="text-orange-400 font-medium">R$ {i.price.toFixed(2)}</span>
-                  </div>
-                ))}
-                <div className="flex justify-between text-xl font-bold pt-4 text-white">
-                  <span>Total</span>
-                  <span className="text-orange-500 font-black italic">R$ {total.toFixed(2)}</span>
-                </div>
-              </div>
-              <div className="space-y-4 pt-4 border-t border-zinc-800">
-                <div className="flex gap-2">
-                  <button onClick={() => setOrderType('local')} className={`flex-1 p-3 rounded-xl text-sm font-bold transition-all ${orderType === 'local' ? 'bg-orange-600 text-white' : 'bg-zinc-800 text-zinc-400'}`}>Mesa</button>
-                  <button onClick={() => setOrderType('delivery')} className={`flex-1 p-3 rounded-xl text-sm font-bold transition-all ${orderType === 'delivery' ? 'bg-orange-600 text-white' : 'bg-zinc-800 text-zinc-400'}`}>Retirada</button>
-                </div>
-                <input type="text" placeholder="Seu Nome" className="w-full bg-zinc-800 p-3 rounded-xl border border-zinc-700 outline-none focus:border-orange-500 transition-all" onChange={(e) => setCustomerData({...customerData, name: e.target.value})} />
-                {orderType === 'local' ? (
-                  <input type="text" placeholder="Número da Mesa" className="w-full bg-zinc-800 p-3 rounded-xl border border-zinc-700 outline-none focus:border-orange-500 transition-all" onChange={(e) => setCustomerData({...customerData, table: e.target.value})} />
-                ) : (
-                  <select className="w-full bg-zinc-800 p-3 rounded-xl border border-zinc-700 outline-none focus:border-orange-500" onChange={(e) => setCustomerData({...customerData, payment: e.target.value})}>
-                    <option value="Pix">Pix</option>
-                    <option value="Cartão">Cartão</option>
-                    <option value="Dinheiro">Dinheiro</option>
-                  </select>
-                )}
-                <button onClick={finishOrder} className="w-full bg-orange-600 hover:bg-orange-500 p-4 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-xl shadow-orange-900/40 active:scale-95 transition-all uppercase tracking-wider">Finalizar Pedido ✨</button>
-              </div>
-            </div>
-          )}
-        </div>
+            <button 
+                onClick={() => setCart([...cart, item])} 
+                className="bg-orange-600 hover:bg-orange-500 w-12 h-12 rounded-2xl font-bold text-2xl shadow-lg active:scale-90 transition-all text-white"
+            >
+                +
+            </button>
+          </div>
+        ))}
       </main>
 
+      {cart.length > 0 && (
+        <div className="fixed bottom-0 left-0 right-0 bg-zinc-900/95 backdrop-blur-md border-t border-zinc-800 p-6 z-40">
+          <div className="max-w-md mx-auto">
+            <div className="flex justify-between items-end mb-4 px-1">
+                <span className="text-zinc-400 font-bold uppercase text-xs tracking-widest italic">🛒 {cart.length} itens</span>
+                <span className="text-3xl font-black text-orange-500 italic">R$ {total.toFixed(2)}</span>
+            </div>
+            <input 
+                type="text" 
+                placeholder="Seu Nome" 
+                className="w-full bg-zinc-800 p-4 rounded-2xl mb-4 border border-zinc-700 outline-none focus:ring-2 ring-orange-500 text-white"
+                onChange={(e) => setCustomerData({...customerData, name: e.target.value})}
+            />
+            <button 
+                onClick={finishOrder}
+                className="w-full bg-orange-600 p-5 rounded-2xl font-black text-xl shadow-xl active:scale-95 transition-all uppercase italic text-white"
+            >
+                Enviar Pedido 🚀
+            </button>
+          </div>
+        </div>
+      )}
+
       {isOrderFinished && (
-        <div className="fixed inset-0 bg-black/95 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-          <div className="bg-zinc-900 p-8 rounded-3xl border border-orange-500 text-center max-w-sm shadow-2xl">
-            <div className="text-5xl mb-4">✅</div>
-            <h2 className="text-2xl font-bold mb-2">Pedido Enviado!</h2>
-            <p className="text-zinc-400 mb-6">Sucesso em Mondaí! Agora é só aguardar.</p>
-            <button onClick={() => { setIsOrderFinished(false); setCart([]); }} className="bg-orange-600 px-8 py-2 rounded-xl font-bold hover:bg-orange-500 transition-all">Fechar</button>
+        <div className="fixed inset-0 bg-black/95 flex items-center justify-center p-6 z-50">
+          <div className="bg-zinc-900 p-10 rounded-[40px] border border-orange-500 text-center shadow-2xl">
+            <div className="text-6xl mb-6">✅</div>
+            <h2 className="text-3xl font-black mb-2 uppercase italic text-orange-500">Sucesso!</h2>
+            <p className="text-zinc-400 mb-8 font-medium">Seu pedido foi enviado para o Moe's!</p>
+            <button onClick={() => setIsOrderFinished(false)} className="bg-zinc-800 px-10 py-3 rounded-2xl font-bold uppercase tracking-widest text-sm text-white border border-zinc-700">Fechar</button>
           </div>
         </div>
       )}
