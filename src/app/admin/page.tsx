@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useMenuStore, MenuItem } from "../../store/useMenuStore";
 import { useStoreConfig } from "../../store/useStoreConfig";
 import Image from "next/image";
+import { optimizeImage } from "../../utils/optimizeImage";
 
 export default function AdminPage() {
     const { items, categories, updateItemImage, addItem, updateItem, deleteItem, fetchMenu, seedCategories, seedProducts, isLoading, addCategory, updateCategory, deleteCategory, updateCategoryOrder, updateProductOrder } = useMenuStore();
@@ -124,11 +125,12 @@ export default function AdminPage() {
         setIsUploading(true);
         setUploadError("");
 
-        const uploadFormData = new FormData();
-        uploadFormData.append("file", file);
-        uploadFormData.append("productId", id || `temp-${Date.now()}`);
-
         try {
+            const optimizedFile = await optimizeImage(file);
+            const uploadFormData = new FormData();
+            uploadFormData.append("file", optimizedFile);
+            uploadFormData.append("productId", id || `temp-${Date.now()}`);
+
             const res = await fetch("/api/upload", {
                 method: "POST",
                 body: uploadFormData,
@@ -149,7 +151,7 @@ export default function AdminPage() {
                 setUploadError(data.error || "Erro ao fazer upload da imagem.");
             }
         } catch (error) {
-            setUploadError("Erro no servidor ao enviar a imagem.");
+            setUploadError(error instanceof Error ? error.message : "Erro ao enviar a imagem.");
         } finally {
             setIsUploading(false);
             if (fileInputRef.current) fileInputRef.current.value = "";
