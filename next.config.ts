@@ -11,6 +11,14 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async rewrites() {
+    return [
+      {
+        source: '/storage-cdn/:path*',
+        destination: 'https://edzcezjkshefeotgtxnt.supabase.co/storage/v1/object/public/:path*',
+      },
+    ];
+  },
 };
 
 export default nextConfig;
