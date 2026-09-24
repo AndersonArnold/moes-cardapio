@@ -9,27 +9,9 @@ const supabase = createClient(
 );
 
 const menuItems = [
-  { 
-    id: 1, 
-    name: "X-Bacon Especial", 
-    description: "Hambúrguer artesanal, bacon crocante, queijo, alface e tomate.", 
-    price: 28.90,
-    image: "/storage-cdn/product-images/xbacon.jpg" // Nome do arquivo no bucket do Supabase
-  },
-  { 
-    id: 2, 
-    name: "Batata Frita G", 
-    description: "Porção generosa de batatas crocantes com cheddar e bacon.", 
-    price: 22.00,
-    image: "/storage-cdn/product-images/batata.jpg"
-  },
-  { 
-    id: 3, 
-    name: "Coca-Cola 2L", 
-    description: "Refrigerante gelado.", 
-    price: 14.00,
-    image: "/storage-cdn/product-images/cocacola.jpg"
-  },
+  { id: 1, name: "X-Bacon Especial", description: "Hambúrguer artesanal, bacon crocante, queijo, alface e tomate.", price: 28.90 },
+  { id: 2, name: "Batata Frita G", description: "Porção generosa de batatas crocantes com cheddar e bacon.", price: 22.00 },
+  { id: 3, name: "Coca-Cola 2L", description: "Refrigerante gelado.", price: 14.00 },
 ];
 
 export default function Home() {
@@ -62,14 +44,7 @@ export default function Home() {
 
         <div className="space-y-4">
           {menuItems.map((item) => (
-            <div key={item.id} className="bg-zinc-900 border border-zinc-800 p-4 rounded-2xl flex items-center justify-between shadow-lg gap-3">
-              {item.image && (
-                <img 
-                  src={item.image} 
-                  alt={item.name} 
-                  className="w-20 h-20 rounded-xl object-cover border border-zinc-800"
-                />
-              )}
+            <div key={item.id} className="bg-zinc-900 border border-zinc-800 p-4 rounded-2xl flex justify-between items-center shadow-lg">
               <div className="flex-1">
                 <h3 className="font-bold text-lg leading-tight">{item.name}</h3>
                 <p className="text-zinc-500 text-xs mt-1">{item.description}</p>
@@ -77,7 +52,7 @@ export default function Home() {
               </div>
               <button 
                 onClick={() => setCart([...cart, item])}
-                className="ml-2 bg-orange-600 w-12 h-12 rounded-xl text-2xl font-bold active:scale-90 transition-all shadow-lg shadow-orange-900/20 shrink-0"
+                className="ml-4 bg-orange-600 w-12 h-12 rounded-xl text-2xl font-bold active:scale-90 transition-all shadow-lg shadow-orange-900/20"
               >
                 +
               </button>
