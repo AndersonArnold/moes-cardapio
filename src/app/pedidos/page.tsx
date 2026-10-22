@@ -1,30 +1,49 @@
 'use client';
-export const runtime = 'edge';
 
 import { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
-// Suas chaves que já funcionaram
 const SUPABASE_URL = 'https://edzcezjkshefeotgtxnt.supabase.co'; 
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkemNlemprc2hlZmVvdGd0eG50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0ODU0ODcsImV4cCI6MjA4ODA2MTQ4N30.jyX3e_JKaSkS3bEEn0IEjnGWIIa_1bdlH2UWFajBGlI'; // Coloque sua chave anon aqui
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkemNlemprc2hlZmVvdGd0eG50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0ODU0ODcsImV4cCI6MjA4ODA2MTQ4N30.jyX3e_JKaSkS3bEEn0IEjnGWIIa_1bdlH2UWFajBGlI';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 export default function PedidosPage() {
   const [pedidos, setPedidos] = useState<any[]>([]);
+  const [isIOS, setIsIOS] = useState(false);
+
+  useEffect(() => {
+    // Detecta se o usuário está no iOS (iPhone/iPad)
+    const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
+    if (/iPad|iPhone|iPod/.test(userAgent) && !(window as any).MSStream) {
+      setIsIOS(true);
+    }
+  }, []);
 
   const imprimirNoCelular = (pedido: any) => {
-    // Decodifica o texto (limpa os %F0%9F...) e tira os códigos de URL
     let textoLimpo = decodeURIComponent(pedido.conteudo || "");
-    textoLimpo = textoLimpo.replace(/\+/g, ' '); // Troca + por espaço se houver
+    textoLimpo = textoLimpo.replace(/\+/g, ' ');
 
     const cupomFinal = `${textoLimpo}\n\n\n\n`;
 
+    if (isIOS) {
+      // No iPhone, como não existe RawBT, abrimos uma janela limpa com o texto formatado para leitura/impressão AirPrint
+      const win = window.open('', '_blank');
+      if (win) {
+        win.document.write(`<html><head><title>Comprovante</title></head><body style="font-family: monospace; white-space: pre-wrap; padding: 20px;">${cupomFinal}</body></html>`);
+        win.document.close();
+      } else {
+        alert('Permita pop-ups no Safari para visualizar o comprovante.');
+      }
+      return;
+    }
+
+    // Fluxo normal para Android (RawBT)
     try {
       const base64Cupom = btoa(unescape(encodeURIComponent(cupomFinal)));
       window.location.href = `rawbt:base64,${base64Cupom}`;
     } catch (e) {
-      console.error("Erro na impressão:", e);
+      console.error("Erro na impressão Android:", e);
     }
   };
 
@@ -39,18 +58,21 @@ export default function PedidosPage() {
     };
     buscarDados();
 
-    // ESCUTA EM TEMPO REAL
     const canal = supabase
       .channel('moes-final')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'pedidos_impressao' }, 
       (payload) => {
         setPedidos((prev) => [payload.new, ...prev]);
-        imprimirNoCelular(payload.new); // Imprime na hora!
+        
+        // No iOS, evitamos disparar window.open automático para não ser bloqueado pelo navegador
+        if (!isIOS) {
+          imprimirNoCelular(payload.new);
+        }
       })
       .subscribe();
 
-    return () => { supabase.removeChannel(canal); };
-  }, []);
+    return () => { supabase.removeChannel(canal); }, [isIOS];
+  }, [isIOS]);
 
   return (
     <div style={{ padding: '20px', fontFamily: 'sans-serif', backgroundColor: '#f0f2f5', minHeight: '100vh' }}>
@@ -64,9 +86,9 @@ export default function PedidosPage() {
             </div>
             <button 
               onClick={() => imprimirNoCelular(p)}
-              style={{ width: '100%', padding: '12px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: '5px', fontWeight: 'bold', fontSize: '16px' }}
+              style={{ width: '100%', padding: '12px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: '5px', fontWeight: 'bold', fontSize: '16px', cursor: 'pointer', touchAction: 'manipulation' }}
             >
-              🖨️ Imprimir agora
+              {isIOS ? '📄 Visualizar / Imprimir Comprovante' : '🖨️ Imprimir agora'}
             </button>
           </div>
         ))}
