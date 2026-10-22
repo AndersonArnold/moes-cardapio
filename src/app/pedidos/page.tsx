@@ -13,21 +13,24 @@ export default function PedidosPage() {
   const [isIOS, setIsIOS] = useState(false);
 
   useEffect(() => {
-    // Detecta se o usuário está no iOS (iPhone/iPad)
-    const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
-    if (/iPad|iPhone|iPod/.test(userAgent) && !(window as any).MSStream) {
-      setIsIOS(true);
+    // Verificação segura do navegador apenas no cliente (Client-side)
+    if (typeof window !== 'undefined') {
+      const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera || '';
+      if (/iPad|iPhone|iPod/.test(userAgent) && !(window as any).MSStream) {
+        setIsIOS(true);
+      }
     }
   }, []);
 
   const imprimirNoCelular = (pedido: any) => {
+    if (typeof window === 'undefined') return;
+
     let textoLimpo = decodeURIComponent(pedido.conteudo || "");
     textoLimpo = textoLimpo.replace(/\+/g, ' ');
 
     const cupomFinal = `${textoLimpo}\n\n\n\n`;
 
     if (isIOS) {
-      // No iPhone, como não existe RawBT, abrimos uma janela limpa com o texto formatado para leitura/impressão AirPrint
       const win = window.open('', '_blank');
       if (win) {
         win.document.write(`<html><head><title>Comprovante</title></head><body style="font-family: monospace; white-space: pre-wrap; padding: 20px;">${cupomFinal}</body></html>`);
@@ -38,7 +41,6 @@ export default function PedidosPage() {
       return;
     }
 
-    // Fluxo normal para Android (RawBT)
     try {
       const base64Cupom = btoa(unescape(encodeURIComponent(cupomFinal)));
       window.location.href = `rawbt:base64,${base64Cupom}`;
@@ -64,14 +66,15 @@ export default function PedidosPage() {
       (payload) => {
         setPedidos((prev) => [payload.new, ...prev]);
         
-        // No iOS, evitamos disparar window.open automático para não ser bloqueado pelo navegador
         if (!isIOS) {
           imprimirNoCelular(payload.new);
         }
       })
       .subscribe();
 
-    return () => { supabase.removeChannel(canal); }, [isIOS];
+    return () => {
+      supabase.removeChannel(canal);
+    };
   }, [isIOS]);
 
   return (
