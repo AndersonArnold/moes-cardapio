@@ -140,24 +140,38 @@ export default function Home() {
 // 1. Prepara a mensagem
     const encodedMessage = formatWhatsAppMessage(messageData);
 
-    // 2. 🔥 NOVO: Grava no banco de dados do Moe's antes de ir pro WhatsApp
-    try {
-      await supabase
-        .from('pedidos_impressao')
-        .insert([
-          {
-            cliente: customerName,
-            conteudo: decodeURIComponent(encodedMessage),
-            impresso: false
-          }
-        ]);
-      console.log("Pedido salvo com sucesso!");
-    } catch (err) {
-      console.error("Erro ao salvar no Supabase:", err);
+    // Abre o WhatsApp imediatamente durante o toque do usuário.
+    // Isso evita que o Safari do iPhone bloqueie a nova janela após um await.
+    const whatsappUrl = `https://wa.me/${config.whatsappNumber}?text=${encodedMessage}`;
+    const whatsappWindow = window.open('about:blank', '_blank');
+
+    if (whatsappWindow) {
+      whatsappWindow.location.href = whatsappUrl;
+    } else {
+      // Alternativa caso o navegador bloqueie a abertura de uma nova aba.
+      window.location.href = whatsappUrl;
     }
 
-    // 3. Abre o WhatsApp normalmente
-    window.open(`https://wa.me/${config.whatsappNumber}?text=${encodedMessage}`, '_blank');
+    // Registra o pedido sem aguardar a resposta do Supabase.
+    void supabase
+      .from('pedidos_impressao')
+      .insert([
+        {
+          cliente: customerName.trim(),
+          conteudo: decodeURIComponent(encodedMessage),
+          impresso: false
+        }
+      ])
+      .then(({ error }) => {
+        if (error) {
+          console.error("Erro ao salvar no Supabase:", error);
+        } else {
+          console.log("Pedido salvo com sucesso!");
+        }
+      })
+      .catch((err) => {
+        console.error("Erro ao salvar no Supabase:", err);
+      });
   };
 
   const cartTotal = getCartTotal();
