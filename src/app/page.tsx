@@ -153,15 +153,17 @@ export default function Home() {
     }
 
     // Registra o pedido sem aguardar a resposta do Supabase.
-    void supabase
-      .from('pedidos_impressao')
-      .insert([
-        {
-          cliente: customerName.trim(),
-          conteudo: decodeURIComponent(encodedMessage),
-          impresso: false
-        }
-      ])
+    void Promise.resolve(
+      supabase
+        .from('pedidos_impressao')
+        .insert([
+          {
+            cliente: customerName.trim(),
+            conteudo: decodeURIComponent(encodedMessage),
+            impresso: false
+          }
+        ])
+    )
       .then(({ error }) => {
         if (error) {
           console.error("Erro ao salvar no Supabase:", error);
